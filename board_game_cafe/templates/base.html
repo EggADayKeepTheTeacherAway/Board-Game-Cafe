@@ -4,17 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Board Game Cafe</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'app/style.css' %}">
 </head>
 <body>
-
-     <div>
-        <h1>Board Game Cafe</h1>
+     <div class="header-container">
+         <div class="website-title">
+             <p>Board Game Cafe</p>
+         </div>
         <hr/>
         <div class="choice">
-          <p>Booking</p>
-          <p>Renting</p>
-          <p>Returning</p>
-          <p>Account</p>
+          <a>Booking</a>
+          <a>Renting</a>
+          <a>Returning</a>
+          <a>Account</a>
         </div>
     </div>
 
