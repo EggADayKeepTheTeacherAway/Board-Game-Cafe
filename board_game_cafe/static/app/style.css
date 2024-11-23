@@ -1,3 +1,12 @@
+@font-face {
+    font-family: 'Pacifico';
+    src:
+        url('../fonts/Pacifico-Regular.ttf') format('truetype');
+    font-weight: bold;
+    font-style: bold;
+}
+
+
 body {
     background-color: #F5F5F5;
     margin: 0px;
@@ -18,14 +27,19 @@ hr {
 .website-title {
     display: flex;
     justify-content: center;
-    font-size: 2.4rem;
+
+    font-size: 3.5rem;
     font-family: Pacifico, Times, serif;
 
 }
 
+.website-title > span {
+    margin: 20px;
+
+}
 .choice {
     display: flex;
-    justify-content: space-evenly;
+    justify-content: space-around;
 
     font-size: 1.6rem;
 
