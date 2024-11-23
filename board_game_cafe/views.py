@@ -5,7 +5,6 @@ from django.http import HttpResponse
 from django.views import generic
 
 
-
 class HomeView(generic.ListView):
     """Class for display Home page."""
     template_name = "app/index.html"
