@@ -8,5 +8,5 @@ app_name = "board_game_cafe"
 urlpatterns = [
     path("", RedirectView.as_view(url="/book")),
     path("book/", views.HomeView.as_view(), name="index"),
-    path("rent/", views.HomeView.as_view(), name="rent")
+    path("rent/", views.RentView.as_view(), name="rent")
 ]

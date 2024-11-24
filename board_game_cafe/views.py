@@ -12,3 +12,11 @@ class HomeView(generic.ListView):
     def get_queryset(self):
 
         return []
+
+class RentView(generic.ListView):
+    """Class for display rent page."""
+    template_name = "app/rent.html"
+
+    def get_queryset(self):
+
+        return []
