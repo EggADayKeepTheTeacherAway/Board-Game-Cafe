@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Login</title>
+  {% load static %}
+  <link rel="stylesheet" href="{% static 'app/account.css' %}">
+</head>
+<body>
+  <div class="container">
+    <div class="choose">
+      <button id="signup-btn">Sign Up</button>
+      <button id="login-btn">Log In</button>
+    </div>
+    <span id="title-text">Sign Up for Free</span>
+    <div class="field" id="fields">
+      <input type="text" placeholder="username" id="username">
+      <input type="password" placeholder="password" id="password">
+      <input type="password" placeholder="confirm password" id="confirm-password">
+    </div>
+    <button id="submit-btn">SIGN UP</button>
+  </div>
+
+  <script>
+    const signupBtn = document.getElementById('signup-btn');
+    const loginBtn = document.getElementById('login-btn');
+    const titleText = document.getElementById('title-text');
+    const fields = document.getElementById('fields');
+    const submitBtn = document.getElementById('submit-btn');
+    const confirmPassword = document.getElementById('confirm-password');
+
+    // Set default mode
+    let isSignUp = true;
+
+    // Handle Sign Up mode
+    signupBtn.addEventListener('click', () => {
+      isSignUp = true;
+      titleText.textContent = 'Sign Up for Free';
+      confirmPassword.style.display = 'block';
+      submitBtn.textContent = 'SIGN UP';
+    });
+
+    // Handle Log In mode
+    loginBtn.addEventListener('click', () => {
+      isSignUp = false;
+      titleText.textContent = 'Welcome Back!';
+      confirmPassword.style.display = 'none';
+      submitBtn.textContent = 'LOG IN';
+    });
+  </script>
+</body>
+</html>
