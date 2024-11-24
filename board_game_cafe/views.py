@@ -20,3 +20,12 @@ class RentView(generic.ListView):
     def get_queryset(self):
 
         return []
+
+class ReturnView(generic.ListView):
+    """Class for display rent page."""
+    template_name = "app/return.html"
+
+    def get_queryset(self):
+
+        return []
+
