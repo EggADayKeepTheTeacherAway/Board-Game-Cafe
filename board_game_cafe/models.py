@@ -21,3 +21,5 @@ class Rental(models.Model):
     item_id = models.CharField(max_length=30, default=None)
     rent_date = models.DateTimeField(auto_now_add=True)
     due_date = models.DateTimeField()
+    status = models.CharField(max_length=30, default=None)
+
