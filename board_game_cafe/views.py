@@ -5,6 +5,14 @@ from django.http import HttpResponse
 from django.views import generic
 
 
+class LoginView(generic.ListView):
+    """Class for login page"""
+    template_name = "account.html"
+
+    def get_queryset(self):
+        return []
+
+
 class HomeView(generic.ListView):
     """Class for display Home page."""
     template_name = "app/index.html"
@@ -12,6 +20,7 @@ class HomeView(generic.ListView):
     def get_queryset(self):
 
         return []
+
 
 class RentView(generic.ListView):
     """Class for display rent page."""
@@ -21,8 +30,9 @@ class RentView(generic.ListView):
 
         return []
 
+
 class ReturnView(generic.ListView):
-    """Class for display rent page."""
+    """Class for display return page."""
     template_name = "app/return.html"
 
     def get_queryset(self):
