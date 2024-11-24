@@ -1,0 +1,112 @@
+/* header */
+
+@font-face {
+    font-family: 'Pacifico';
+    src:
+        url('../fonts/Pacifico-Regular.ttf') format('truetype');
+    font-weight: bold;
+    font-style: bold;
+}
+
+
+body {
+    background-color: #F5F5F5;
+    margin: 0px;
+    padding: 0px;
+}
+
+hr {
+     border: 1px solid #953C00;
+}
+
+.header-container {
+    background-color: #FF6600;
+    border: 2px solid #953C00;
+    color: white;
+
+}
+
+.website-title {
+    display: flex;
+    justify-content: center;
+
+    font-size: 3.5rem;
+    font-family: Pacifico, Times, serif;
+
+}
+
+.website-title > span {
+    margin: 20px;
+
+}
+.choice {
+    display: flex;
+    justify-content: space-around;
+
+    font-size: 1.8rem;
+
+}
+
+.choice > a {
+    margin-top: 5px;
+    margin-bottom: 10px;
+
+    color: white;
+    text-decoration: none;
+}
+
+/* body start here */
+
+.main-body {
+    margin: 60px;
+}
+
+.container {
+    margin-top: 80px;
+}
+
+legend {
+    background-color: #FF6600;
+    color: white;
+    font-size: 1.2rem;
+
+    padding: 5px 30px;
+    border: 2px solid #953C00;
+    border-radius: 4px;
+
+}
+
+fieldset {
+    min-height: 10rem;
+
+    border-radius: 8px;
+    border: 2px solid #953C00;
+}
+
+.content {
+    display: grid;
+    grid-template-columns: 30% 30% 30%;
+
+
+    background-color: #f1f1f1;
+    color: black;
+
+    margin: 10px;
+    padding: 10px;
+
+    border-radius: 8px;
+    border: 1px solid #DBDBDB;
+}
+
+.name {
+    margin-left: 16px;
+}
+.aval {
+    justify-self: center;
+
+}
+
+.button {
+    width: 5rem;
+    justify-self: end;
+}

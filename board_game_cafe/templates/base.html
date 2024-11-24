@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Board Game Cafe</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'app/style.css' %}">
+</head>
+<body>
+     <div class="header-container">
+         <div class="website-title">
+             <span>Board Game Cafe</span>
+         </div>
+        <hr/>
+        <div class="choice">
+          <a href="{% url 'board_game_cafe:index'%}">Booking</a>
+          <a href="{% url 'board_game_cafe:rent'%}" >Renting</a>
+          <a>Returning</a>
+          <a>Account</a>
+        </div>
+    </div>
+
+    {% block content %}{% endblock %}
+</body>
+</html>
