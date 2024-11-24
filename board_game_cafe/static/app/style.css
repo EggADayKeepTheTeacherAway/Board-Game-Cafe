@@ -1,3 +1,5 @@
+/* header */
+
 @font-face {
     font-family: 'Pacifico';
     src:
@@ -41,15 +43,70 @@ hr {
     display: flex;
     justify-content: space-around;
 
-    font-size: 1.6rem;
+    font-size: 1.8rem;
 
 }
 
 .choice > a {
     margin-top: 5px;
     margin-bottom: 10px;
+
+    color: white;
+    text-decoration: none;
+}
+
+/* body start here */
+
+.main-body {
+    margin: 60px;
+}
+
+.container {
+    margin-top: 80px;
+}
+
+legend {
+    background-color: #FF6600;
+    color: white;
+    font-size: 1.2rem;
+
+    padding: 5px 30px;
+    border: 2px solid #953C00;
+    border-radius: 4px;
+
+}
+
+fieldset {
+    min-height: 10rem;
+
+    border-radius: 8px;
+    border: 2px solid #953C00;
 }
 
 .content {
-    background-color: #F1F1F1
+    display: grid;
+    grid-template-columns: 30% 30% 30%;
+
+
+    background-color: #f1f1f1;
+    color: black;
+
+    margin: 10px;
+    padding: 10px;
+
+    border-radius: 8px;
+    border: 1px solid #DBDBDB;
+}
+
+.name {
+    margin-left: 16px;
+}
+.aval {
+    justify-self: center;
+
+}
+
+.button {
+    width: 5rem;
+    justify-self: end;
 }

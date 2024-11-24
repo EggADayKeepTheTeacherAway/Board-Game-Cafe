@@ -1,27 +1,29 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="board-game container">
-    <div class="board-game-header">
-        Board Game
-    </div>
+<section class="main-body">
+    <fieldset class="board-game container">
+        <legend class="board-game-header">
+            Board Game
+        </legend>
 
-    <div class="content">
-        <span>Board Game Name 1</span>
-        <span>bookable</span>
-        <button>book</button>
-    </div>
-</div>
+        <div class="content">
+            <span class="name">Board Game Name 1</span>
+            <span class="aval">available</span>
+            <button class="button">book</button>
+        </div>
+    </fieldset>
 
-<div class="table container">
-    <div class="table-header">
-        Table
-    </div>
+    <fieldset class="table container">
+        <legend class="table-header">
+            Table
+        </legend>
 
-    <div class="content">
-        <span>Table 1</span>
-        <span>bookable</span>
-        <button>book</button>
-    </div>
-</div>
+        <div class="content">
+            <span class="name">Table 1</span>
+            <span class="aval">available</span>
+            <button class="button">book</button>
+        </div>
+    </fieldset>
+</section>
 {% endblock %}
