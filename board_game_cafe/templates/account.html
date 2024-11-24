@@ -10,16 +10,17 @@
 <body>
   <div class="container">
     <div class="choose">
-      <button id="signup-btn">Sign Up</button>
-      <button id="login-btn">Log In</button>
+      <button id="signup-btn" class="btn active">Sign Up</button>
+      <button id="login-btn" class="btn">Log In</button>
     </div>
+
     <span id="title-text">Sign Up for Free</span>
     <div class="field" id="fields">
-      <input type="text" placeholder="username" id="username">
-      <input type="password" placeholder="password" id="password">
-      <input type="password" placeholder="confirm password" id="confirm-password">
+      <input type="text" placeholder="Username" id="username">
+      <input type="password" placeholder="Password" id="password">
+      <input type="password" placeholder="Confirm password" id="confirm-password">
     </div>
-    <button id="submit-btn">SIGN UP</button>
+    <button id="submit-btn" class="btn">SIGN UP</button>
   </div>
 
   <script>
@@ -36,6 +37,8 @@
     // Handle Sign Up mode
     signupBtn.addEventListener('click', () => {
       isSignUp = true;
+      signupBtn.classList.add('active');
+      loginBtn.classList.remove('active');
       titleText.textContent = 'Sign Up for Free';
       confirmPassword.style.display = 'block';
       submitBtn.textContent = 'SIGN UP';
@@ -44,10 +47,13 @@
     // Handle Log In mode
     loginBtn.addEventListener('click', () => {
       isSignUp = false;
+      loginBtn.classList.add('active');
+      signupBtn.classList.remove('active');
       titleText.textContent = 'Welcome Back!';
       confirmPassword.style.display = 'none';
       submitBtn.textContent = 'LOG IN';
     });
+
   </script>
 </body>
 </html>
