@@ -50,10 +50,18 @@ hr {
 .choice > a {
     margin-top: 5px;
     margin-bottom: 10px;
+    padding: 2px;
 
     color: white;
     text-decoration: none;
 }
+
+.choice a.active {
+    border-bottom: 3.25px solid white;
+    border-radius: 4px;
+    color: white;
+}
+
 
 /* body start here */
 
@@ -100,13 +108,36 @@ fieldset {
 
 .name {
     margin-left: 16px;
+    align-self: center;
 }
+
 .aval {
     justify-self: center;
+    align-self: center;
+    color: green;
 
 }
 
 .button {
+    color: white;
+    background-color: #4abd33;
+
+    border: 0px;
+    border-radius: 8px;
+
+    height: 1.5rem;
     width: 5rem;
     justify-self: end;
+    align-self: center;
 }
+
+.button:hover {
+    cursor: pointer;
+    background-color: #41a62d   ;
+}
+
+.button:active {
+    transform: scale(0.98);
+}
+
+

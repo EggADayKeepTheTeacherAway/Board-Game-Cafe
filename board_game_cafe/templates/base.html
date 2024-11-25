@@ -1,10 +1,11 @@
 <!DOCTYPE html>
+{% load static %}
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Board Game Cafe</title>
-    {% load static %}
+    <link rel="icon" href="{% static 'img/d20-icon.png' %}">
     <link rel="stylesheet" href="{% static 'app/style.css' %}">
 </head>
 <body>
@@ -14,10 +15,17 @@
          </div>
         <hr/>
         <div class="choice">
-          <a href="{% url 'board_game_cafe:index'%}">Booking</a>
-          <a href="{% url 'board_game_cafe:rent'%}" >Renting</a>
-          <a href="{% url 'board_game_cafe:return'%}">Returning</a>
-          <a>Account</a>
+          <a href="{% url 'board_game_cafe:index'%}" class="{% if request.resolver_match.url_name == 'index' %}active{% endif %}">
+              Booking
+          </a>
+          <a href="{% url 'board_game_cafe:rent'%}" class="{% if request.resolver_match.url_name == 'rent' %}active{% endif %}">
+              Renting
+          </a>
+          <a href="{% url 'board_game_cafe:return'%}" class="{% if request.resolver_match.url_name == 'return' %}active{% endif %}">
+              Returning
+          </a>
+
+            <a>Account</a>
         </div>
     </div>
 
