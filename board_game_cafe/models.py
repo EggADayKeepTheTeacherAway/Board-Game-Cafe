@@ -54,5 +54,5 @@ class BoardGameGroup(models.Model):
 class BoardGame(models.Model):
     boardgame_id = models.AutoField(primary_key=True, unique=True)
     boardgame_name = models.CharField(max_length=30, default=None)
-    category_id = models
-    group = models.ForeignKey(BoardGameGroup)
+    category = models.CharField(max_length=30, default=None)
+    group = models.ForeignKey(BoardGameGroup, on_delete=models.CASCADE)
