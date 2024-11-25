@@ -1,7 +1,12 @@
+"""Urls module for travel to each poll html."""
 from django.urls import path
+from django.views.generic.base import RedirectView
 
 from . import views
 
+app_name = "board_game_cafe"
 urlpatterns = [
-    path("", views.index, name="index"),
+    path("", RedirectView.as_view(url="/book")),
+    path("book/", views.HomeView.as_view(), name="index"),
+    path("rent/", views.HomeView.as_view(), name="rent")
 ]

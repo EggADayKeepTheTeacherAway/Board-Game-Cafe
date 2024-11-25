@@ -56,3 +56,4 @@ class BoardGame(models.Model):
     boardgame_name = models.CharField(max_length=30, default=None)
     category = models.CharField(max_length=30, default=None)
     group = models.ForeignKey(BoardGameGroup, on_delete=models.CASCADE)
+
