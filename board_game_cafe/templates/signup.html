@@ -3,27 +3,38 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Sign Up</title>
+  <title>Login</title>
   {% load static %}
   <link rel="stylesheet" href="{% static 'app/account.css' %}">
 </head>
 <body>
   <div class="container">
-    <form method="post">
+    <div class="choose">
+      <button id="signup-btn" class="btn active">Sign Up</button>
+      <button id="login-btn" class="btn">Log In</button>
+    </div>
+
+
+    <span id="title-text">Sign Up for Free</span>
+     <form method="post" action="{% url 'signup' %}">
       {% csrf_token %}
       {% if messages %}
         {% for msg in messages %}
-            <p class="{{msg.tags}}">{{ msg }}</li>
+          <p class="{{ msg.tags }}">{{ msg }}</p>
         {% endfor %}
       {% endif %}
-      <span id="title-text">Sign Up</span>
+
       <div class="field" id="fields">
-        {{ form.as_p }}
+        <input type="text" name="customer_name" placeholder="Username" id="username" required>
+        <input type="password" name="password" placeholder="Password" id="password" required>
+        <input type="password" name="confirm_password" placeholder="Confirm password" id="confirm-password" required>
+        <input type="text" name="contact" placeholder="Contact" id="contact" required>
       </div>
-      <button type="submit" id="submit-btn" class="btn">Sign Up</button>
+      <button id="submit-btn" class="btn" type="submit">SIGN UP</button>
     </form>
+
   </div>
-{% comment %} 
+
   <script>
     const signupBtn = document.getElementById('signup-btn');
     const loginBtn = document.getElementById('login-btn');
@@ -31,6 +42,7 @@
     const fields = document.getElementById('fields');
     const submitBtn = document.getElementById('submit-btn');
     const confirmPassword = document.getElementById('confirm-password');
+    const contactField = document.getElementById('contact');
 
     // Set default mode
     let isSignUp = true;
@@ -41,8 +53,15 @@
       signupBtn.classList.add('active');
       loginBtn.classList.remove('active');
       titleText.textContent = 'Sign Up for Free';
+
       confirmPassword.style.display = 'block';
+      confirmPassword.setAttribute('required', 'true');
+
+      contactField.style.display = 'block';
+      contactField.setAttribute('required', 'true');
+
       submitBtn.textContent = 'SIGN UP';
+      form.action = "{% url 'signup' %}";
     });
 
     // Handle Log In mode
@@ -51,10 +70,17 @@
       loginBtn.classList.add('active');
       signupBtn.classList.remove('active');
       titleText.textContent = 'Welcome Back!';
+
       confirmPassword.style.display = 'none';
+      confirmPassword.removeAttribute('required');
+
+      contactField.style.display = 'none';
+      contactField.removeAttribute('required');
+
       submitBtn.textContent = 'LOG IN';
+      form.action = "{% url 'login' %}";
     });
 
-  </script> {% endcomment %}
+  </script>
 </body>
 </html>

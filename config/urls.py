@@ -24,7 +24,7 @@ urlpatterns = [
     #      name="index"),
 
     path("", RedirectView.as_view(pattern_name="signup", permanent=False), name="index"),
-    path('board_game_cafe/', include("board_game_cafe.urls")),
+    path('cafe/', include("board_game_cafe.urls")),
     path("signup/", views.signup, name="signup"),
     path("login/", views.login, name="login"),
     path("admin/", admin.site.urls),
