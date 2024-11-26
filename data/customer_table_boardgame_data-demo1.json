@@ -1,0 +1,182 @@
+[
+    {
+      "model": "board_game_cafe.customer",
+      "pk": 1,
+      "fields": {
+        "customer_name": "Rattanan Rung-uthai",
+        "contact": "987-654-3210",
+        "password": "password123"
+      }
+    },
+    {
+      "model": "board_game_cafe.customer",
+      "pk": 2,
+      "fields": {
+        "customer_name": "Kasidet Uthaiwiwatkul",
+        "contact": "555-123-4567",
+        "password": "password123"
+      }
+    },
+    {
+      "model": "board_game_cafe.customer",
+      "pk": 3,
+      "fields": {
+        "customer_name": "Panida Rumriankit",
+        "contact": "123-456-7890",
+        "password": "password123"
+      }
+    },
+    {
+      "model": "board_game_cafe.customer",
+      "pk": 4,
+      "fields": {
+        "customer_name": "Peerapat Seenoi",
+        "contact": "444-555-6666",
+        "password": "password123"
+      }
+    },
+    {
+      "model": "board_game_cafe.customer",
+      "pk": 5,
+      "fields": {
+        "customer_name": "Riccardo Bonato",
+        "contact": "777-888-9999",
+        "password": "password123"
+      }
+    },
+    {
+      "model": "board_game_cafe.table",
+      "pk": 1,
+      "fields": {
+        "capacity": 8
+      }
+    },
+    {
+      "model": "board_game_cafe.table",
+      "pk": 2,
+      "fields": {
+        "capacity": 5
+      }
+    },
+    {
+      "model": "board_game_cafe.table",
+      "pk": 3,
+      "fields": {
+        "capacity": 3
+      }
+    },
+    {
+      "model": "board_game_cafe.boardgamegroup",
+      "pk": 1,
+      "fields": {
+        "group_name": "small",
+        "base_fee": 5
+      }
+    },
+    {
+      "model": "board_game_cafe.boardgamegroup",
+      "pk": 2,
+      "fields": {
+        "group_name": "medium",
+        "base_fee": 10
+      }
+    },
+    {
+      "model": "board_game_cafe.boardgamegroup",
+      "pk": 3,
+      "fields": {
+        "group_name": "large",
+        "base_fee": 15
+      }
+    },
+    {
+      "model": "board_game_cafe.boardgamecategory",
+      "pk": 1,
+      "fields": {
+        "category_name": "Bluffing"
+      }
+    },
+    {
+      "model": "board_game_cafe.boardgamecategory",
+      "pk": 2,
+      "fields": {
+        "category_name": "Strategy"
+      }
+    },
+    {
+      "model": "board_game_cafe.boardgamecategory",
+      "pk": 3,
+      "fields": {
+        "category_name": "Cooperative"
+      }
+    },
+    {
+      "model": "board_game_cafe.boardgamecategory",
+      "pk": 4,
+      "fields": {
+        "category_name": "Dice"
+      }
+    },
+    {
+      "model": "board_game_cafe.boardgamecategory",
+      "pk": 5,
+      "fields": {
+        "category_name": "Role Playing"
+      }
+    },
+    {
+      "model": "board_game_cafe.boardgame",
+      "pk": 1,
+      "fields": {
+        "boardgame_name": "Sheriff of Nottingham",
+        "group": 1,
+        "category": 1
+      }
+    },
+    {
+      "model": "board_game_cafe.boardgame",
+      "pk": 2,
+      "fields": {
+        "boardgame_name": "Catan",
+        "group": 2,
+        "category": 2
+      }
+    },
+    {
+      "model": "board_game_cafe.boardgame",
+      "pk": 3,
+      "fields": {
+        "boardgame_name": "Splendor",
+        "group": 1,
+        "category": 2
+      }
+    },
+    {
+      "model": "board_game_cafe.boardgame",
+      "pk": 4,
+      "fields": {
+        "boardgame_name": "Werewolf",
+        "group": 2,
+        "category": 1
+      }
+    },
+    {
+      "model": "board_game_cafe.boardgame",
+      "pk": 5,
+      "fields": {
+        "boardgame_name": "Pandemic",
+        "group": 2,
+        "category": 3
+      }
+    },
+    {
+      "model": "board_game_cafe.boardgame",
+      "pk": 6,
+      "fields": {
+        "boardgame_name": "Mascarade",
+        "group": 3,
+        "category": 1
+      }
+    }
+  ]
+  

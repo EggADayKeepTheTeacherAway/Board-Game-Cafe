@@ -66,18 +66,14 @@ def logout(request):
 class HomeView(generic.ListView):
     """Class for display Home page."""
     template_name = "app/index.html"
+    context_object_name = "data"
 
     def get_queryset(self):
-        return []
 
-
-class PostView(generic.ListView):
-    """Class for display the input field for the user when clicking the book button."""
-    template_name = "app/post_field.html"
-
-    def get_queryset(self):
-        action = self.request.GET.get("action", "default")
-        return [{"action": action}]
+        return {
+            'boardgame': BoardGame.objects.all(),
+            'table': Table.objects.all()
+            }
 
 
 class RentView(generic.ListView):

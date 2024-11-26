@@ -20,9 +20,6 @@ from django.views.generic.base import RedirectView
 from board_game_cafe import views
 
 urlpatterns = [
-    # path("", RedirectView.as_view(pattern_name='board_game_cafe:register', permanent=False),
-    #      name="index"),
-
     path("", RedirectView.as_view(pattern_name="signup", permanent=False), name="index"),
     path('cafe/', include("board_game_cafe.urls")),
     path("signup/", views.signup, name="signup"),
