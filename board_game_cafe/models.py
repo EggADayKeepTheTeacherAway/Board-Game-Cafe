@@ -6,6 +6,7 @@ class Customer(models.Model):
     customer_id = models.AutoField(primary_key=True, unique=True)
     customer_name = models.CharField(max_length=30, default=None)
     contact = models.CharField(max_length=30, default=None)
+    password = models.CharField(max_length=30, default=None)
 
     class Meta:
         app_label = 'board_game_cafe'
