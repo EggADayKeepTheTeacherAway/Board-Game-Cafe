@@ -47,3 +47,10 @@ class ReturnView(generic.ListView):
 
         return []
 
+class StatView(generic.ListView):
+    """Class for display statistic of many thing."""
+    template_name = "app/statistic.html"
+
+    def get_queryset(self):
+        return []
+
