@@ -34,7 +34,7 @@ class Rental(models.Model):
     item_id = models.CharField(max_length=30, default=None)
     rent_date = models.DateTimeField(default=timezone.now)
     due_date = models.DateTimeField(default=next_three_days)
-    status = models.CharField(max_length=30, default=None)
+    status = models.CharField(max_length=30, default='rented')
     return_date = models.DateTimeField(null=True)
     fee = models.IntegerField(null=True)
 
@@ -68,3 +68,13 @@ class BoardGame(models.Model):
     group = models.ForeignKey(BoardGameGroup, on_delete=models.CASCADE)
     category = models.ForeignKey(BoardGameCategory, on_delete=models.CASCADE)
     stock = models.IntegerField(default=0)
+
+    def rent_boardgame(self):
+        if self.stock <= 0:
+            raise ValueError("This BoardGame is not available at this time")
+        self.stock -= 1
+        self.save()
+
+    def return_boardgame(self):
+        self.stock += 1
+        self.save()
