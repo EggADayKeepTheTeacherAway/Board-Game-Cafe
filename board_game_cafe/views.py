@@ -21,6 +21,14 @@ class HomeView(generic.ListView):
 
         return []
 
+class PostView(generic.ListView):
+    """Class for display the input field for the user when clicking the book button."""
+    template_name = "app/post_field.html"
+
+    def get_queryset(self):
+        action = self.request.GET.get("action", "default")
+        return [{"action": action}]
+
 
 class RentView(generic.ListView):
     """Class for display rent page."""
