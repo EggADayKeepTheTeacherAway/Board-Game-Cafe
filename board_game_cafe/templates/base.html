@@ -9,23 +9,36 @@
     <link rel="stylesheet" href="{% static 'app/style.css' %}">
 </head>
 <body>
-     <div class="header-container">
-         <div class="website-title">
-             <span>Board Game Cafe</span>
-         </div>
+    <div class="header-container">
+        <div class="website-title">
+            <span>Board Game Cafe</span>
+        </div>
         <hr/>
         <div class="choice">
-          <a href="{% url 'board_game_cafe:index'%}" class="{% if request.resolver_match.url_name == 'index' %}active{% endif %}">
-              Booking
-          </a>
-          <a href="{% url 'board_game_cafe:rent'%}" class="{% if request.resolver_match.url_name == 'rent' %}active{% endif %}">
-              Renting
-          </a>
-          <a href="{% url 'board_game_cafe:return'%}" class="{% if request.resolver_match.url_name == 'return' %}active{% endif %}">
-              Returning
-          </a>
+            <a href="{% url 'board_game_cafe:index' %}" class="{% if request.resolver_match.url_name == 'index' %}active{% endif %}">
+                Booking
+            </a>
+            <a href="{% url 'board_game_cafe:rent' %}" class="{% if request.resolver_match.url_name == 'rent' %}active{% endif %}">
+                Renting
+            </a>
+            <a href="{% url 'board_game_cafe:return' %}" class="{% if request.resolver_match.url_name == 'return' %}active{% endif %}">
+                Returning
+            </a>
+            <a href="{% url 'board_game_cafe:stat' %}" class="{% if request.resolver_match.url_name == 'stat' %}active{% endif %}">
+                Statistic
+            </a>
 
-            <a>Account</a>
+            <div class="dropdown">
+                <a class="{% if request.resolver_match.url_name == 'profile' %}active{% endif %}">
+                    Account
+                </a>
+                <div class="dropdown-content">
+                    <a href="{% url 'board_game_cafe:profile' %}">
+                        Profile
+                    </a>
+                    <a href="{% url 'board_game_cafe:login' %}" id="logout-btn">Logout</a>
+                </div>
+            </div>
         </div>
     </div>
 
