@@ -3,11 +3,13 @@
 from django.shortcuts import get_object_or_404, redirect, render
 from django.http import HttpResponse
 from django.contrib import messages
+from django.db.models import F
 from django.views import generic
 from .forms import RegisterForm, LoginForm
 from .models import (Rental, Table, BoardGame,
                      Customer, BoardGameCategory,
-                     BoardGameGroup)
+                     BoardGameGroup,
+                     )
 
 
 def login(request):
@@ -83,9 +85,27 @@ class RentView(generic.ListView):
 
     context_object_name = 'item'
 
-    def get_queryset(self):
+    def post(self, request, *args, **kwargs):
+        item_type = request.POST['item_type']
+        item_id = request.POST['item_id']
+        user = Customer.object.get(customer_id=request.session['customer_id'])
+        due_date = request.POST['due_date']
 
-        return []
+        if item_type == 'BoardGame':
+            BoardGame.objects.get(boardgame_id=item_id).rent_boardgame()
+
+        Rental.objects.create(customer=user,
+                                item_type=item_type,
+                                item_id=item_id,
+                                due_date=due_date)
+
+    def get_queryset(self):
+        return {
+            'boardgame': BoardGame.objects.filter(stock__gt=0),
+            'table': [table.table_id
+                      for table in Table.objects.all()
+                      if table.is_available]
+        }
 
 
 class ReturnView(generic.ListView):

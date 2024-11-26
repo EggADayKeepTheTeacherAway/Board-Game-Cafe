@@ -1,0 +1,23 @@
+[
+    {
+        "model": "board_game_cafe.table",
+        "pk": 1,
+        "fields": {
+          "capacity": 8
+        }
+      },
+      {
+        "model": "board_game_cafe.table",
+        "pk": 2,
+        "fields": {
+          "capacity": 5
+        }
+      },
+      {
+        "model": "board_game_cafe.table",
+        "pk": 3,
+        "fields": {
+          "capacity": 3
+        }
+      }
+]
