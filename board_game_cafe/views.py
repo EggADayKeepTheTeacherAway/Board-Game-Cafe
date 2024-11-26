@@ -3,6 +3,7 @@
 from django.shortcuts import get_object_or_404, redirect, render
 from django.http import HttpResponse
 from django.views import generic
+from models import Rental, Table, BoardGame
 
 
 class LoginView(generic.ListView):
@@ -18,16 +19,17 @@ class HomeView(generic.ListView):
     template_name = "app/index.html"
 
     def get_queryset(self):
-
         return []
 
 
 class RentView(generic.ListView):
     """Class for display rent page."""
+    model = Rental
     template_name = "app/rent.html"
 
-    def get_queryset(self):
+    context_object_name = ''
 
+    def get_queryset(self):
         return []
 
 
@@ -36,6 +38,5 @@ class ReturnView(generic.ListView):
     template_name = "app/return.html"
 
     def get_queryset(self):
-
         return []
 
