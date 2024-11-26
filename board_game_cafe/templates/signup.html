@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Login</title>
+  <title>Sign Up</title>
   {% load static %}
   <link rel="stylesheet" href="{% static 'app/account.css' %}">
 </head>
@@ -11,16 +11,16 @@
   <div class="container">
     <form method="post">
       {% csrf_token %}
-      <span id="title-text">Log In</span>
       {% if messages %}
         {% for msg in messages %}
             <p class="{{msg.tags}}">{{ msg }}</li>
         {% endfor %}
       {% endif %}
+      <span id="title-text">Sign Up</span>
       <div class="field" id="fields">
         {{ form.as_p }}
       </div>
-      <button type="submit" id="submit-btn" class="btn">Log In</button>
+      <button type="submit" id="submit-btn" class="btn">Sign Up</button>
     </form>
   </div>
 {% comment %} 

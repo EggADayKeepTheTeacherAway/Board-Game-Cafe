@@ -6,6 +6,7 @@ class Customer(models.Model):
     customer_id = models.AutoField(primary_key=True, unique=True)
     customer_name = models.CharField(max_length=30, default=None)
     contact = models.CharField(max_length=30, default=None)
+    password = models.CharField(max_length=30, default=None)
 
     class Meta:
         app_label = 'board_game_cafe'
@@ -17,11 +18,14 @@ class Booking(models.Model):
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
     item_type = models.CharField(max_length=30, default=None)
     item_id = models.CharField(max_length=30, default=None)
+    status = models.CharField(max_length=30, default=None)
     
     class Meta:
         app_label = 'board_game_cafe'
         db_table = 'Booking'
 
+def next_three_days():
+    return timezone.now() + timezone.timedelta(days=3)
 
 class Rental(models.Model):
     rental_id = models.AutoField(primary_key=True, unique=True)
@@ -29,12 +33,9 @@ class Rental(models.Model):
     item_type = models.CharField(max_length=30, default=None)
     item_id = models.CharField(max_length=30, default=None)
     rent_date = models.DateTimeField(default=timezone.now)
-    due_date = models.DateTimeField(default=timezone.now)
+    due_date = models.DateTimeField(default=next_three_days)
     status = models.CharField(max_length=30, default=None)
-
-    @property
-    def duration(self):
-        return timezone.now() - self.rent_date
+    return_date = models.DateTimeField(null=True)
 
     class Meta:
         app_label = 'board_game_cafe'
