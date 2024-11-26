@@ -11,7 +11,7 @@ from .models import (Rental, Table, BoardGame,
 
 
 def login(request):
-    form = LoginForm()
+    """Login function."""
     if request.method == "POST":
         customer_name = request.POST['customer_name']
         password = request.POST['password']
@@ -21,27 +21,46 @@ def login(request):
             request.session['customer_id'] = user.customer_id 
             return redirect('board_game_cafe:index')
         messages.error(request,
-                       "You entered wrong username or password, or you forgot to sign up.")
-    return render(request, 'login.html', {'form': form})
+                       "You entered wrong username or password.")
+
+        return redirect('signup')
+    return render(request, 'signup.html')
 
 
 def signup(request):
-    form = RegisterForm()
+    """Sign up function."""
     if request.method == "POST":
         customer_name = request.POST['customer_name']
         password = request.POST['password']
+        confirm_password = request.POST['confirm_password']
         contact = request.POST['contact']
-        if Customer.objects.filter(customer_name=customer_name,
-                                       password=password,
-                                       contact=contact).exists():
+
+        if password != confirm_password:
+            messages.error(request, "Passwords do not match.")
+            return redirect('signup')
+
+        if Customer.objects.filter(customer_name=customer_name).exists():
             messages.warning(request, "You already have an account.")
-            return redirect('login')
+            return redirect('signup')
+
         user = Customer.objects.create(customer_name=customer_name,
-                                    password=password,
-                                    contact=contact)
+                                       password=password,
+                                       contact=contact)
+
         request.session['customer_id'] = user.customer_id
+        messages.success(request, "Account created successfully!")
         return redirect('board_game_cafe:index')
-    return render(request, 'signup.html', {'form': form})
+
+    return render(request, 'signup.html')
+
+def logout(request):
+    """Logout function."""
+    if 'customer_id' in request.session:
+        del request.session['customer_id']
+        messages.success(request, "You have been logged out successfully.")
+    else:
+        messages.warning(request, "You are not logged in.")
+    return redirect('signup')
 
 
 class HomeView(generic.ListView):
