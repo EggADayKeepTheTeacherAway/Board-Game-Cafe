@@ -80,3 +80,18 @@ class ReturnView(generic.ListView):
     def get_queryset(self):
         return []
 
+
+class StatView(generic.ListView):
+    """Class for display statistic of many thing."""
+    template_name = "app/statistic.html"
+
+    def get_queryset(self):
+        return []
+
+
+class ProfileView(generic.ListView):
+    """Class for display the profile of customer."""
+    template_name = "app/profile.html"
+
+    def get_queryset(self):
+        return []
