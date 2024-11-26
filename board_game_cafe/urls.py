@@ -7,8 +7,7 @@ from . import views
 app_name = "board_game_cafe"
 
 urlpatterns = [
-    path("", RedirectView.as_view(pattern_name="board_game_cafe:book", permanent=False), name="index"),
-    path("book/", views.HomeView.as_view(), name="book"),
+    path("", views.HomeView.as_view(), name="index"),
     path("rent/", views.RentView.as_view(), name="rent"),
     path("return/", views.ReturnView.as_view(), name="return"),
     path("stat/", views.StatView.as_view(), name="stat"),
