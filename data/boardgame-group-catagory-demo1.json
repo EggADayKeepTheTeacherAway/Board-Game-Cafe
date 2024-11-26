@@ -1,0 +1,62 @@
+[
+    {
+      "model": "board_game_cafe.boardgamegroup",
+      "pk": 1,
+      "fields": {
+        "group_name": "small",
+        "base_fee": 5
+      }
+    },
+    {
+      "model": "board_game_cafe.boardgamegroup",
+      "pk": 2,
+      "fields": {
+        "group_name": "medium",
+        "base_fee": 10
+      }
+    },
+    {
+      "model": "board_game_cafe.boardgamegroup",
+      "pk": 3,
+      "fields": {
+        "group_name": "large",
+        "base_fee": 15
+      }
+    },
+    {
+      "model": "board_game_cafe.boardgamecategory",
+      "pk": 1,
+      "fields": {
+        "category_name": "Bluffing"
+      }
+    },
+    {
+      "model": "board_game_cafe.boardgamecategory",
+      "pk": 2,
+      "fields": {
+        "category_name": "Strategy"
+      }
+    },
+    {
+      "model": "board_game_cafe.boardgamecategory",
+      "pk": 3,
+      "fields": {
+        "category_name": "Cooperative"
+      }
+    },
+    {
+      "model": "board_game_cafe.boardgamecategory",
+      "pk": 4,
+      "fields": {
+        "category_name": "Dice"
+      }
+    },
+    {
+      "model": "board_game_cafe.boardgamecategory",
+      "pk": 5,
+      "fields": {
+        "category_name": "Role Playing"
+      }
+    }
+  ]
+  

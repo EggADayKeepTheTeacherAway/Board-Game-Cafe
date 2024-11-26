@@ -1,0 +1,47 @@
+[
+    {
+        "model": "board_game_cafe.customer",
+        "pk": 1,
+        "fields": {
+          "customer_name": "Rattanan Rung-uthai",
+          "contact": "987-654-3210",
+          "password": "password123"
+        }
+      },
+      {
+        "model": "board_game_cafe.customer",
+        "pk": 2,
+        "fields": {
+          "customer_name": "Kasidet Uthaiwiwatkul",
+          "contact": "555-123-4567",
+          "password": "password123"
+        }
+      },
+      {
+        "model": "board_game_cafe.customer",
+        "pk": 3,
+        "fields": {
+          "customer_name": "Panida Rumriankit",
+          "contact": "123-456-7890",
+          "password": "password123"
+        }
+      },
+      {
+        "model": "board_game_cafe.customer",
+        "pk": 4,
+        "fields": {
+          "customer_name": "Peerapat Seenoi",
+          "contact": "444-555-6666",
+          "password": "password123"
+        }
+      },
+      {
+        "model": "board_game_cafe.customer",
+        "pk": 5,
+        "fields": {
+          "customer_name": "Riccardo Bonato",
+          "contact": "777-888-9999",
+          "password": "password123"
+        }
+      }
+]

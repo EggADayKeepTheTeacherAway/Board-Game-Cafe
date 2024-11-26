@@ -1,0 +1,62 @@
+[
+  {
+    "model": "board_game_cafe.boardgame",
+    "pk": 1,
+    "fields": {
+      "boardgame_name": "Sheriff of Nottingham",
+      "group": 1,
+      "category": 1,
+      "stock": 5
+    }
+  },
+  {
+    "model": "board_game_cafe.boardgame",
+    "pk": 2,
+    "fields": {
+      "boardgame_name": "Catan",
+      "group": 2,
+      "category": 2,
+      "stock": 5
+    }
+  },
+  {
+    "model": "board_game_cafe.boardgame",
+    "pk": 3,
+    "fields": {
+      "boardgame_name": "Splendor",
+      "group": 1,
+      "category": 2,
+      "stock": 5
+    }
+  },
+  {
+    "model": "board_game_cafe.boardgame",
+    "pk": 4,
+    "fields": {
+      "boardgame_name": "Werewolf",
+      "group": 2,
+      "category": 1,
+      "stock": 5
+    }
+  },
+  {
+    "model": "board_game_cafe.boardgame",
+    "pk": 5,
+    "fields": {
+      "boardgame_name": "Pandemic",
+      "group": 2,
+      "category": 3,
+      "stock": 5
+    }
+  },
+  {
+    "model": "board_game_cafe.boardgame",
+    "pk": 6,
+    "fields": {
+      "boardgame_name": "Mascarade",
+      "group": 3,
+      "category": 1,
+      "stock": 5
+    }
+  }
+]
