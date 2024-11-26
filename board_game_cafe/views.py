@@ -4,6 +4,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.http import HttpResponse
 from django.contrib import messages
 from django.db.models import F, Count
+from django.db.models.functions import ExtractWeekDay, ExtractHour
 from django.views import generic
 from django.utils import timezone
 from .forms import RegisterForm, LoginForm
@@ -134,14 +135,7 @@ class ReturnView(generic.ListView):
 class StatView(generic.ListView):
     """Class for display statistic of many thing."""
     template_name = "app/statistic.html"
-
-    def get_queryset(self):
-        return []
-
-
-class ProfileView(generic.ListView):
-    """Class for display the profile of customer."""
-    template_name = "app/profile.html"
+    context_object_name = 'data'
 
     def get_queryset(self):
         popular_boardgame = (
@@ -149,24 +143,31 @@ class ProfileView(generic.ListView):
             .values('item_id')
             .annotate(rental_count=Count('item_id'))
             .order_by('-rental_count')
-            .values_list('item_id')
+            .values_list('item_id', flat=True)
                         )
         
         peak_hour = (
             Rental.objects.filter(item_type="Table")
-            .values(hour=F('rent_date__hour'))
+            .annotate(hour=ExtractHour('rent_date'))
+            .values('hour')
             .annotate(table_rental=Count('hour'))
-            .order_by('-hour')
-            .values_list('hour')
+            .order_by('-table_rental')
+            .values_list('hour', flat=True)
         )
         week_day = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
         peak_day = (
             Rental.objects.filter(item_type="Table")
-            .values(day=F('rent_date__weekday'))
+            .annotate(day=ExtractWeekDay('rent_date'))  # Extract weekday from rent_date
+            .values('day')
             .annotate(table_rental=Count('day'))
-            .order_by('-day')
-            .values_list('day')
+            .order_by('-table_rental')
+            .values_list('day', flat=True)  # Get only the day
         )
+
+        print('hnelo')
+        print(popular_boardgame)
+        print(peak_hour)
+        print(peak_day)
 
         return {
             "popular_boardgame": BoardGame.objects.get(boardgame_id=popular_boardgame[0]),
@@ -174,4 +175,12 @@ class ProfileView(generic.ListView):
             "peak_hour": peak_hour[0],
             "peak_day": week_day[peak_day[0]],
         }
+
+
+class ProfileView(generic.ListView):
+    """Class for display the profile of customer."""
+    template_name = "app/profile.html"
+
+    def get_queryset(self):
+        return []
     
