@@ -84,7 +84,7 @@ class RentView(generic.ListView):
     context_object_name = 'item'
 
     def get_queryset(self):
-        
+
         return []
 
 
