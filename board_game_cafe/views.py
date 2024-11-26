@@ -3,8 +3,9 @@
 from django.shortcuts import get_object_or_404, redirect, render
 from django.http import HttpResponse
 from django.contrib import messages
-from django.db.models import F
+from django.db.models import F, Count
 from django.views import generic
+from django.utils import timezone
 from .forms import RegisterForm, LoginForm
 from .models import (Rental, Table, BoardGame,
                      Customer, BoardGameCategory,
@@ -91,6 +92,10 @@ class RentView(generic.ListView):
         user = Customer.object.get(customer_id=request.session['customer_id'])
         due_date = request.POST['due_date']
 
+        if (due_date - timezone.now()).days > 9:
+            messages.warning("You can rent boardgame 9 days at a time.")
+            return redirect('board_game_cafe:rent')
+
         if item_type == 'BoardGame':
             BoardGame.objects.get(boardgame_id=item_id).rent_boardgame()
 
@@ -104,7 +109,7 @@ class RentView(generic.ListView):
             'boardgame': BoardGame.objects.filter(stock__gt=0),
             'table': [table.table_id
                       for table in Table.objects.all()
-                      if table.is_available]
+                      if table.is_available()]
         }
 
 
@@ -112,8 +117,18 @@ class ReturnView(generic.ListView):
     """Class for display return page."""
     template_name = "app/return.html"
 
+    def get(self, request, *args, **kwargs):
+        self.user = Customer.objects.get(customer_id=request.session['customer_id'])
+        return super().get(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        rental = Rental.objects.get(rental_id=request.POST['rental_id'])
+        rental_fee = rental.compute_fee() # TODO: if have transaction THIS IS THE FEE.
+        if rental.item_type == 'BoardGame':
+            rental.get_item().return_boardgame()
+
     def get_queryset(self):
-        return []
+        return Rental.objects.filter(customer=self.user, status='rented')
 
 
 class StatView(generic.ListView):
