@@ -7,7 +7,7 @@ from django.views import generic
 
 class LoginView(generic.ListView):
     """Class for login page"""
-    template_name = "account.html"
+    template_name = "login.html"
 
     def get_queryset(self):
         return []
@@ -47,6 +47,7 @@ class ReturnView(generic.ListView):
 
         return []
 
+
 class StatView(generic.ListView):
     """Class for display statistic of many thing."""
     template_name = "app/statistic.html"
@@ -54,3 +55,10 @@ class StatView(generic.ListView):
     def get_queryset(self):
         return []
 
+
+class ProfileView(generic.ListView):
+    """Class for display the profile of customer."""
+    template_name = "app/profile.html"
+
+    def get_queryset(self):
+        return []
