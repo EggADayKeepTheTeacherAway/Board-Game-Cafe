@@ -125,6 +125,16 @@ fieldset {
     border: 0px;
     border-radius: 8px;
 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    font-family: inherit;
+    font-size: 0.9rem;
+    font-weight: normal;
+    text-align: center;
+    text-decoration: none;
+
     height: 1.5rem;
     width: 5rem;
     justify-self: end;

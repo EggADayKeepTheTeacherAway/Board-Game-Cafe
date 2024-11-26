@@ -10,7 +10,7 @@
         <div class="content">
             <span class="name">Board Game Name 1</span>
             <span class="aval">available</span>
-            <button class="button">rent</button>
+            <a href="{% url 'board_game_cafe:post_view' %}?action=rent" class="button">rent</a>
         </div>
     </fieldset>
 
@@ -22,7 +22,7 @@
         <div class="content">
             <span class="name">Table 1</span>
             <span class="aval">available</span>
-            <button class="button">rent</button>
+            <a href="{% url 'board_game_cafe:post_view' %}?action=rent" class="button">rent</a>
         </div>
     </fieldset>
 </section>
