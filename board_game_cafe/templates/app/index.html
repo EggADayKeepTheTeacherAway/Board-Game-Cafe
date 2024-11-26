@@ -12,6 +12,22 @@
             <span class="aval">available</span>
             <a href="{% url 'board_game_cafe:post_view' %}?action=book" class="button">book</a>
         </div>
+
+        <div class="controls">
+            <label for="sort">Sort by:</label>
+            <select id="sort" onchange="">
+                <option value="">Select</option>
+                <option value="name_asc">Name (A-Z)</option>
+                <option value="name_desc">Popularity</option>
+            </select>
+
+            <label for="category">Category:</label>
+            <select id="category" onchange="">
+                <option value="">Select</option>
+                <option value="yes">Yes</option>
+            </select>
+
+        </div>
     </fieldset>
 
     <fieldset class="table container">
@@ -23,6 +39,20 @@
             <span class="name">Table 1</span>
             <span class="aval">available</span>
             <a href="{% url 'board_game_cafe:post_view' %}?action=book" class="button">book</a>
+        </div>
+
+        <div class="controls">
+            <label for="table-sort">Sort by:</label>
+            <select id="table-sort" onchange="">
+                <option value="">Select</option>
+                <option value="capacity">Capacity</option>
+            </select>
+
+            <label for="capacity">Capacity:</label>
+            <select id="capacity" onchange="">
+                <option value="">Select</option>
+                <option value="yes">Yes</option>
+            </select>
         </div>
     </fieldset>
 </section>
