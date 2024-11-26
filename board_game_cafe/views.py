@@ -53,7 +53,8 @@ class HomeView(generic.ListView):
 
         return {
             'boardgame': BoardGame.objects.all(),
-            'table': Table.objects.all()}
+            'table': Table.objects.all()
+            }
 
 
 class RentView(generic.ListView):
@@ -64,7 +65,7 @@ class RentView(generic.ListView):
     context_object_name = 'item'
 
     def get_queryset(self):
-
+        
         return []
 
 
