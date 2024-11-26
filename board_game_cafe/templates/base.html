@@ -25,6 +25,10 @@
               Returning
           </a>
 
+          <a href="{% url 'board_game_cafe:stat'%}" class="{% if request.resolver_match.url_name == 'stat' %}active{% endif %}">
+              Statistic
+          </a>
+
             <a>Account</a>
         </div>
     </div>
