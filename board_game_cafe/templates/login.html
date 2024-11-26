@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Login</title>
+  {% load static %}
+  <link rel="stylesheet" href="{% static 'app/account.css' %}">
+</head>
+<body>
+  <div class="container">
+    <form method="post">
+      {% csrf_token %}
+      <span id="title-text">Log In</span>
+      {% if messages %}
+        {% for msg in messages %}
+            <p class="{{msg.tags}}">{{ msg }}</li>
+        {% endfor %}
+      {% endif %}
+      <div class="field" id="fields">
+        {{ form.as_p }}
+      </div>
+      <button type="submit" id="submit-btn" class="btn">Log In</button>
+    </form>
+  </div>
+{% comment %} 
+  <script>
+    const signupBtn = document.getElementById('signup-btn');
+    const loginBtn = document.getElementById('login-btn');
+    const titleText = document.getElementById('title-text');
+    const fields = document.getElementById('fields');
+    const submitBtn = document.getElementById('submit-btn');
+    const confirmPassword = document.getElementById('confirm-password');
+
+    // Set default mode
+    let isSignUp = true;
+
+    // Handle Sign Up mode
+    signupBtn.addEventListener('click', () => {
+      isSignUp = true;
+      signupBtn.classList.add('active');
+      loginBtn.classList.remove('active');
+      titleText.textContent = 'Sign Up for Free';
+      confirmPassword.style.display = 'block';
+      submitBtn.textContent = 'SIGN UP';
+    });
+
+    // Handle Log In mode
+    loginBtn.addEventListener('click', () => {
+      isSignUp = false;
+      loginBtn.classList.add('active');
+      signupBtn.classList.remove('active');
+      titleText.textContent = 'Welcome Back!';
+      confirmPassword.style.display = 'none';
+      submitBtn.textContent = 'LOG IN';
+    });
+
+  </script> {% endcomment %}
+</body>
+</html>

@@ -3,26 +3,27 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Login</title>
+  <title>Sign Up</title>
   {% load static %}
   <link rel="stylesheet" href="{% static 'app/account.css' %}">
 </head>
 <body>
   <div class="container">
-    <div class="choose">
-      <button id="signup-btn" class="btn active">Sign Up</button>
-      <button id="login-btn" class="btn">Log In</button>
-    </div>
-
-    <span id="title-text">Sign Up for Free</span>
-    <div class="field" id="fields">
-      <input type="text" placeholder="Username" id="username">
-      <input type="password" placeholder="Password" id="password">
-      <input type="password" placeholder="Confirm password" id="confirm-password">
-    </div>
-    <button id="submit-btn" class="btn">SIGN UP</button>
+    <form method="post">
+      {% csrf_token %}
+      {% if messages %}
+        {% for msg in messages %}
+            <p class="{{msg.tags}}">{{ msg }}</li>
+        {% endfor %}
+      {% endif %}
+      <span id="title-text">Sign Up</span>
+      <div class="field" id="fields">
+        {{ form.as_p }}
+      </div>
+      <button type="submit" id="submit-btn" class="btn">Sign Up</button>
+    </form>
   </div>
-
+{% comment %} 
   <script>
     const signupBtn = document.getElementById('signup-btn');
     const loginBtn = document.getElementById('login-btn');
@@ -54,6 +55,6 @@
       submitBtn.textContent = 'LOG IN';
     });
 
-  </script>
+  </script> {% endcomment %}
 </body>
 </html>
