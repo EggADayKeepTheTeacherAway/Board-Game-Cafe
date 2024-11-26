@@ -36,6 +36,7 @@ class Rental(models.Model):
     due_date = models.DateTimeField(default=next_three_days)
     status = models.CharField(max_length=30, default=None)
     return_date = models.DateTimeField(null=True)
+    fee = models.IntegerField(null=True)
 
     class Meta:
         app_label = 'board_game_cafe'
