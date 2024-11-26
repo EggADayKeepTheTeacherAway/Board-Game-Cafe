@@ -144,4 +144,34 @@ class ProfileView(generic.ListView):
     template_name = "app/profile.html"
 
     def get_queryset(self):
-        return []
+        popular_boardgame = (
+            Rental.objects.filter(item_type="BoardGame")
+            .values('item_id')
+            .annotate(rental_count=Count('item_id'))
+            .order_by('-rental_count')
+            .values_list('item_id')
+                        )
+        
+        peak_hour = (
+            Rental.objects.filter(item_type="Table")
+            .values(hour=F('rent_date__hour'))
+            .annotate(table_rental=Count('hour'))
+            .order_by('-hour')
+            .values_list('hour')
+        )
+        week_day = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+        peak_day = (
+            Rental.objects.filter(item_type="Table")
+            .values(day=F('rent_date__weekday'))
+            .annotate(table_rental=Count('day'))
+            .order_by('-day')
+            .values_list('day')
+        )
+
+        return {
+            "popular_boardgame": BoardGame.objects.get(boardgame_id=popular_boardgame[0]),
+            "top_boardgame": BoardGame.objects.filter(boardgame_id__in=popular_boardgame[:5]),
+            "peak_hour": peak_hour[0],
+            "peak_day": week_day[peak_day[0]],
+        }
+    
