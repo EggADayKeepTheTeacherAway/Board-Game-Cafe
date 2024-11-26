@@ -9,5 +9,6 @@ urlpatterns = [
     path("", views.LoginView.as_view(), name="login"),
     path("book/<int:pk>", views.HomeView.as_view(), name="index"),
     path("rent/<int:pk>", views.RentView.as_view(), name="rent"),
-    path("return/", views.ReturnView.as_view(), name="return")
+    path("return/", views.ReturnView.as_view(), name="return"),
+    path("input/", views.PostView.as_view(), name="post_view"),
 ]

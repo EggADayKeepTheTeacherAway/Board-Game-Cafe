@@ -29,7 +29,7 @@ class Rental(models.Model):
     item_type = models.CharField(max_length=30, default=None)
     item_id = models.CharField(max_length=30, default=None)
     rent_date = models.DateTimeField(default=timezone.now)
-    due_date = models.DateTimeField(default=timezone.now+timezone.timedelta(days=3))
+    due_date = models.DateTimeField(default=timezone.now)
     status = models.CharField(max_length=30, default=None)
 
     @property
@@ -47,13 +47,16 @@ class Table(models.Model):
 
 
 class BoardGameGroup(models.Model):
-    group_name = models.Charfield(max_length=30, default="small")
+    group_name = models.CharField(max_length=30, default="small")
     base_fee = models.IntegerField(default=5)
 
+class BoardGameCategory(models.Model):
+    category_id = models.AutoField(primary_key=True, unique=True)
+    category_name = models.CharField(max_length=30, default="Dice")
 
 class BoardGame(models.Model):
     boardgame_id = models.AutoField(primary_key=True, unique=True)
     boardgame_name = models.CharField(max_length=30, default=None)
     category = models.CharField(max_length=30, default=None)
     group = models.ForeignKey(BoardGameGroup, on_delete=models.CASCADE)
-
+    category = models.ForeignKey(BoardGameCategory, on_delete=models.CASCADE)

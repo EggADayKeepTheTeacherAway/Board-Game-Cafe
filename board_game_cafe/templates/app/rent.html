@@ -10,7 +10,7 @@
         <div class="content">
             <span class="name">Board Game Name 1</span>
             <span class="aval">available</span>
-            <button class="button">rent</button>
+            <a href="#" onclick="handleRent('Board Game Name 1'); return false;" class="button">rent</a>
         </div>
     </fieldset>
 
@@ -22,8 +22,41 @@
         <div class="content">
             <span class="name">Table 1</span>
             <span class="aval">available</span>
-            <button class="button">rent</button>
+            <a href="#" onclick="handleRent('Table 1'); return false;" class="button">rent</a>
         </div>
     </fieldset>
 </section>
+
+<!-- Backdrop for disabling interactions -->
+<div id="backdrop" class="backdrop hidden"></div>
+
+<!-- Popup Notification -->
+<div id="popup-notification" class="popup hidden">
+    <p id="popup-message"></p>
+    <button onclick="closePopup()">Close</button>
+</div>
+
+<script>
+    function showPopup(message) {
+        const popup = document.getElementById('popup-notification');
+        const popupMessage = document.getElementById('popup-message');
+        const backdrop = document.getElementById('backdrop');
+
+        popupMessage.textContent = message;
+        popup.classList.remove('hidden');
+        backdrop.classList.remove('hidden');
+    }
+
+    function closePopup() {
+        const popup = document.getElementById('popup-notification');
+        const backdrop = document.getElementById('backdrop');
+
+        popup.classList.add('hidden');
+        backdrop.classList.add('hidden');
+    }
+
+    function handleRent(itemName) {
+        showPopup(`You have successfully rented "${itemName}"!`);
+    }
+</script>
 {% endblock %}
