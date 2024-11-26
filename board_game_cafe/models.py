@@ -47,6 +47,11 @@ class Table(models.Model):
     table_id = models.AutoField(primary_key=True, unique=True)
     capacity = models.IntegerField(default=4)
 
+    @property
+    def is_available(self):
+        return self.table_id not in Rental.objects.filter(
+            item_type='Table', status="rented").values_list('item_id', flat=True)
+
 
 class BoardGameGroup(models.Model):
     group_name = models.CharField(max_length=30, default="small")
@@ -62,3 +67,4 @@ class BoardGame(models.Model):
     category = models.CharField(max_length=30, default=None)
     group = models.ForeignKey(BoardGameGroup, on_delete=models.CASCADE)
     category = models.ForeignKey(BoardGameCategory, on_delete=models.CASCADE)
+    stock = models.IntegerField(default=0)
