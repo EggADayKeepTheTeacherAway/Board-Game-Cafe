@@ -93,7 +93,7 @@ fieldset {
 
 .content {
     display: grid;
-    grid-template-columns: 30% 30% 30%;
+    grid-template-columns: 20% 20% 20% 20% 20%;
 
 
     background-color: #f1f1f1;
@@ -111,10 +111,9 @@ fieldset {
     align-self: center;
 }
 
-.aval {
+.category {
     justify-self: center;
     align-self: center;
-    color: green;
 
 }
 
