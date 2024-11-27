@@ -74,7 +74,8 @@ class Rental(models.Model):
     @classmethod
     def is_good_due_date(cls, due_date, item_type):
         item = {'Table': Table, 'BoardGame': BoardGame}.get(item_type)
-        return (due_date - timezone.now()).hour > item.max_rent_time
+        time_difference = due_date - timezone.now()
+        return time_difference.total_seconds() / 3600 > item.max_rent_time
 
     @classmethod
     def create(cls, item_type, item_id, user, due_date):

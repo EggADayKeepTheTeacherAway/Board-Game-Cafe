@@ -1,5 +1,7 @@
 """Views class for element that show to the user."""
 
+from datetime import datetime
+from django.utils.timezone import make_aware
 from django.shortcuts import get_object_or_404, redirect, render
 from django.http import HttpResponse
 from django.contrib import messages
@@ -153,10 +155,15 @@ class RentView(generic.ListView):
         def rent():
             item_type = request.POST['item_type']
             item_id = request.POST['item_id']
-            user = Customer.object.get(customer_id=request.session['customer_id'])
-            due_date = request.POST['due_date']
+            user = Customer.objects.get(customer_id=request.session['customer_id'])
+            try:
+                due_date_str = request.POST['due_date']
+                due_date = make_aware(datetime.strptime(due_date_str, "%Y-%m-%d"))
+            except ValueError:
+                messages.error(request, "Invalid due date format. Please use YYYY-MM-DD.")
+                return redirect('board_game_cafe:rent')
             
-            Booking.delete(item_type, item_id, self.user)
+            Booking.delete_if_exists(item_type, item_id, self.user)
 
             day_or_hour = 'hours' if item_type == 'Table' else 'days'
 
