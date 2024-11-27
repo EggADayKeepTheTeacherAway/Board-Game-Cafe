@@ -72,7 +72,7 @@ class HomeView(generic.ListView):
     context_object_name = "data"
 
     def get_queryset(self):
-
+        """Sent data to the frontend."""
         return {
             'boardgame': BoardGame.objects.all(),
             'table': Table.objects.all()
@@ -123,6 +123,7 @@ class RentView(generic.ListView):
                                 due_date=due_date)
 
     def get_queryset(self):
+        """Sent data to the frontend."""
         return {
             'boardgame': BoardGame.objects.filter(stock__gt=0),
             'table': [table.table_id
@@ -147,6 +148,7 @@ class ReturnView(generic.ListView):
             rental.get_item().return_boardgame()
 
     def get_queryset(self):
+        """Sent data to the frontend."""
         return {
             'boardgame': Rental.objects.filter(customer=self.user, item_type="BoardGame",
                                                status='rented'),
@@ -161,6 +163,7 @@ class StatView(generic.ListView):
     context_object_name = 'data'
 
     def get_queryset(self):
+        """Sent data to the frontend."""
         popular_boardgame = (
             Rental.objects.filter(item_type="BoardGame")
             .values('item_id')
@@ -216,6 +219,7 @@ class ProfileView(generic.ListView):
         return super().get(request, *args, **kwargs)
 
     def get_queryset(self):
+        """Sent data to the frontend."""
         return {
             'id': self.user.customer_id,
             'username': self.user.customer_name,
