@@ -30,7 +30,7 @@
                 <span class="name">Table {{ table.table_id }}</span>
                 <span class="capacity">Capacity: {{ table.capacity }}</span>
                 <span class="category">Base Fee: {{ table.fee }} Baht / day</span>
-                <a href="#" onclick="handleRent('Table {{ table.table_id }}', 'Table'c); return false;" class="button">
+                <a href="#" onclick="handleRent('Table {{ table.table_id }}', 'Table', {{ table.table_id }}); return false;" class="button">
                     rent
                 </a>
             </div>
