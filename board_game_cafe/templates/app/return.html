@@ -7,11 +7,16 @@
             Board Game
         </legend>
 
-        <div class="content">
-            <span class="name">Board Game Name 1</span>
-            <span class="aval">available</span>
-            <a href="{% url 'board_game_cafe:post_view' %}?action=return" class="button">return</a>
-        </div>
+        {% for book in data.boardgame %}
+            <div class="content">
+                <span class="name">Name: {{ book.boardgame_name }}</span>
+                <span class="category">Genre: {{ book.category.category_name }}</span>
+                <span class="category">Number of Player: {{ book.group.group_name }}</span>
+                <span class="category">Base Fee: {{ book.group.base_fee }} THB</span>
+                <a href="{% url 'board_game_cafe:post_view' %}?action=return" class="button">return</a>
+            </div>
+        {% endfor %}
+
     </fieldset>
 
     <fieldset class="table container">
@@ -19,11 +24,15 @@
             Table
         </legend>
 
-        <div class="content">
-            <span class="name">Table 1</span>
-            <span class="aval">available</span>
-            <a href="{% url 'board_game_cafe:post_view' %}?action=return" class="button">return</a>
-        </div>
+         {% for table in data.table %}
+            <div class="content">
+                <span class="name">Table {{ table.table_id }}</span>
+                <span class="capacity">Capacity: {{ table.capacity }}</span>
+                <span class="category">Base Fee: {{ table.fee}} THB</span>
+                <a href="{% url 'board_game_cafe:post_view' %}?action=return" class="button">return</a>
+            </div>
+        {% endfor %}
+
     </fieldset>
 </section>
 {% endblock %}

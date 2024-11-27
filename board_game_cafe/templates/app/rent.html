@@ -13,7 +13,7 @@
                 <span class="category">Genre: {{ book.category.category_name }}</span>
                 <span class="category">Number of Player: {{ book.group.num_player }}</span>
                 <span class="category">Base Fee: {{ book.group.base_fee }} Baht / day</span>
-                <a href="#" onclick="handleRent('{{ book.boardgame_name }}', 'BoardGame'); return false;" class="button">
+                <a href="#" onclick="handleRent('{{ book.boardgame_name }}', 'BoardGame', {{ book.boardgame_id }}); return false;" class="button">
                     rent
                 </a>
             </div>
@@ -30,7 +30,7 @@
                 <span class="name">Table {{ table.table_id }}</span>
                 <span class="capacity">Capacity: {{ table.capacity }}</span>
                 <span class="category">Base Fee: {{ table.fee }} Baht / day</span>
-                <a href="#" onclick="handleRent('Table {{ table.table_id }}', 'Table'); return false;" class="button">
+                <a href="#" onclick="handleRent('Table {{ table.table_id }}', 'Table'c); return false;" class="button">
                     rent
                 </a>
             </div>
@@ -57,7 +57,7 @@
     let currentItemName = '';
     let currentItemType = '';
 
-    function showPopup(itemName, itemType) {
+    function showPopup(itemName, itemType, itemID) {
         const popup = document.getElementById('popup-notification');
         const popupMessage = document.getElementById('popup-message');
         const backdrop = document.getElementById('backdrop');
@@ -65,6 +65,7 @@
 
         currentItemName = itemName;
         currentItemType = itemType; // Set the current item type
+        currentItemID = itemID;
         popupMessage.textContent = `You have selected to rent "${itemName}". Please choose an end date.`;
 
         const today = new Date().toISOString().split('T')[0];
@@ -120,7 +121,7 @@
         const itemNameInput = document.createElement('input');
         itemNameInput.type = 'hidden';
         itemNameInput.name = 'item_id';
-        itemNameInput.value = currentItemName;
+        itemNameInput.value = currentItemID;
         form.appendChild(itemNameInput);
 
         // Add due date
@@ -138,8 +139,8 @@
         closePopup();
     }
 
-    function handleRent(itemName, itemType) {
-        showPopup(itemName, itemType);
+    function handleRent(itemName, itemType, itemID) {
+        showPopup(itemName, itemType, itemID);
     }
 </script>
 

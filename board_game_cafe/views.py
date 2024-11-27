@@ -7,6 +7,8 @@ from django.db.models import F, Count
 from django.db.models.functions import ExtractWeekDay, ExtractHour
 from django.views import generic
 from django.utils import timezone
+from datetime import datetime
+from django.utils.timezone import make_aware, now
 from .models import (Rental, Table, BoardGame,
                      Customer, BoardGameCategory,
                      BoardGameGroup, Booking
@@ -95,6 +97,11 @@ class RentView(generic.ListView):
 
     context_object_name = 'item'
 
+    def __init__(self):
+        """Initailize method for Rent feature."""
+        super().__init__()
+        self.user = None
+
     def get(self, request, *args, **kwargs):
         self.user = Customer.objects.get(customer_id=request.session['customer_id'])
         return super().get(request, *args, **kwargs)
@@ -105,52 +112,66 @@ class RentView(generic.ListView):
         {
             item_type: str['Table' || 'BoardGame']
             item_id: str|int
-            due_date: Datetime? idk you tell me or give whatever I'll convert it
+            due_date: str (YYYY-MM-DD)
         }
         """
         redirect_url = redirect('board_game_cafe:rent')
-        item_type = request.POST['item_type']
-        item_id = request.POST['item_id']
+        item_type = request.POST.get('item_type')
+        item_id = request.POST.get('item_id')
+        due_date_str = request.POST.get('due_date')  # Due date as string
         user = Customer.objects.get(customer_id=request.session['customer_id'])
-        due_date = request.POST['due_date']
+
+        # Convert due_date_str to datetime object
+        try:
+            due_date = make_aware(datetime.strptime(due_date_str, "%Y-%m-%d"))
+        except ValueError:
+            messages.error(request, "Invalid due date format. Please use YYYY-MM-DD.")
+            return redirect_url
+
+        # Debugging: Log the converted due_date
+        print(f"Converted due_date: {due_date}")
 
         def table_handler():
-            if (due_date - timezone.now()).hour > 6:
-                messages.warning("You can rent table 6 hours at a time.")
+            if (due_date - now()).total_seconds() > 6 * 3600:  # 6 hours in seconds
+                messages.warning(request, "You can rent a table for a maximum of 6 hours at a time.")
                 return redirect_url
-            
-            if Rental.objects.filter(customer=user,
-                                     item_type="Table", status='rented').exists():
-                messages.warning("You can rent 1 table at a time.")
+
+            if Rental.objects.filter(customer=user, item_type="Table", status='rented').exists():
+                messages.warning(request, "You can rent only one table at a time.")
                 return redirect_url
 
         def boardgame_handler():
-            if (due_date - timezone.now()).days > 9:
-                messages.warning("You can rent boardgame 9 days at a time.")
+            if (due_date - now()).days > 9:  # Check if rental period exceeds 9 days
+                messages.warning(request, "You can rent a board game for a maximum of 9 days.")
                 return redirect_url
 
-            
-            if Rental.objects.filter(customer=self.user,
-                                     item_type="BoardGame",
-                                     item_id=item_id).count() >= 3:
-                messages.warning("You can rent 3 boardgames at a time.")
+            if Rental.objects.filter(customer=user, item_type="BoardGame", item_id=item_id).count() >= 3:
+                messages.warning(request, "You can rent up to 3 board games at a time.")
                 return redirect_url
 
+            # Update board game stock or other rental logic
             BoardGame.objects.get(boardgame_id=item_id).rent_boardgame()
 
-        handler = {"Table": table_handler,
-                   "BoardGame": boardgame_handler}
-        Booking.objects.filter(item_id=item_id,
-                               item_type=item_type,
-                               customer=self.user)
-        response = handler.get(item_type)()
+        # Choose the appropriate handler
+        handler = {"Table": table_handler, "BoardGame": boardgame_handler}
+        if item_type not in handler:
+            messages.error(request, "Invalid item type.")
+            return redirect_url
+
+        response = handler[item_type]()
         if response is not None:
             return response
 
-        Rental.objects.create(customer=user,
-                                item_type=item_type,
-                                item_id=item_id,
-                                due_date=due_date)
+        # Create the rental record
+        Rental.objects.create(
+            customer=user,
+            item_type=item_type,
+            item_id=item_id,
+            due_date=due_date
+        )
+
+        messages.success(request, f"Successfully rented {item_type} {item_id} until {due_date}.")
+        return redirect_url
 
     def get_queryset(self):
         """
