@@ -13,7 +13,15 @@
                 <span class="category">Genre: {{ book.category.category_name }}</span>
                 <span class="category">Number of Player: {{ book.group.num_player }}</span>
                 <span class="category">Base Fee: {{ book.group.base_fee }} Baht / day</span>
-                <a href="{% url 'board_game_cafe:post_view' %}?action=book" class="button">book</a>
+                <form method="POST" action="{% url 'board_game_cafe:index' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="boardgame_sort_mode" value="none">
+                    <input type="hidden" name="boardgame_filter" value="none">
+                    <input type="hidden" name="table_sort_mode" value="none">
+                    <input type="hidden" name="table_filter" value="none">
+                    <button type="submit" class="button">book</button>
+                </form>
+
             </div>
         {% endfor %}
 
@@ -22,13 +30,15 @@
             <select id="sort" onchange="">
                 <option value="">Select</option>
                 <option value="name_asc">Name (A-Z)</option>
-                <option value="name_desc">Popularity</option>
+                <option value="popular">Popularity</option>
             </select>
 
             <label for="category">Category:</label>
             <select id="category" onchange="">
                 <option value="">Select</option>
-                <option value="yes">Yes</option>
+                {% for category in list_of_category %}
+                    <option value="{{ category }}">{{ category }}</option>
+                {% endfor %}
             </select>
 
         </div>
@@ -58,7 +68,9 @@
             <label for="capacity">Capacity:</label>
             <select id="capacity" onchange="">
                 <option value="">Select</option>
-                <option value="yes">Yes</option>
+                {% for all_capa in list_of_capacity %}
+                    <option value="{{ all_capa }}">{{ all_capa }}</option>
+                {% endfor %}
             </select>
         </div>
     </fieldset>
