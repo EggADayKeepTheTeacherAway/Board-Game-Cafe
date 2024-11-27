@@ -11,6 +11,8 @@ from django.views import generic
 from django.utils import timezone
 from datetime import datetime
 from django.utils.timezone import make_aware, now
+from unicodedata import category
+
 from .models import (Rental, Table, BoardGame,
                      Customer, BoardGameCategory,
                      BoardGameGroup, Booking
@@ -114,6 +116,28 @@ class HomeView(generic.ListView):
             'boardgame': BoardGame.objects.all(),
             'table': Table.objects.all()
             }
+
+    def get_context_data(self, **kwargs):
+        """
+        Add custom context to the template.
+
+        (Use this method to sent the data that I want to results.html)
+        """
+        context = super().get_context_data(**kwargs)
+
+        category_list = []
+
+        for board in BoardGame.objects.all():
+            if board.category.category_name not in category_list:
+                category_list.append(board.category.category_name)
+
+        context['list_of_category'] = category_list
+
+        num_max = max([table.capacity for table in Table.objects.all()])
+
+        context['list_of_capacity'] = [i for i in range(1, num_max + 1)]
+
+        return context
 
 
 class RentView(generic.ListView):
