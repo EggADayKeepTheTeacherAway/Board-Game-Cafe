@@ -1,5 +1,7 @@
 """Views class for element that show to the user."""
 
+from datetime import datetime
+from django.utils.timezone import make_aware
 from django.shortcuts import get_object_or_404, redirect, render
 from django.http import HttpResponse
 from django.contrib import messages
@@ -9,6 +11,8 @@ from django.views import generic
 from django.utils import timezone
 from datetime import datetime
 from django.utils.timezone import make_aware, now
+from unicodedata import category
+
 from .models import (Rental, Table, BoardGame,
                      Customer, BoardGameCategory,
                      BoardGameGroup, Booking
@@ -77,6 +81,9 @@ class HomeView(generic.ListView):
         """
         POST DATA SCHEMA:
         {
+            item_type: str['Table' || 'BoardGame']
+            item_id: str|int
+
             boardgame_sort_mode: str['A-Z' || 'Popularity']
             boardgame_filter: str
             table_sortt_mode: str
@@ -84,10 +91,16 @@ class HomeView(generic.ListView):
         }
         """
         user = Customer.objects.get(customer_id=request.session['customer_id'])
+        item_type = request.POST.get('item_type')
+        item_id = request.POST.get('item_id')
+        
+        if item_type and item_id:
+            Booking.create_or_delete(item_type, item_id, user)
+
         boardgame_sort_mode = request.POST.get('boardgame_sort_mode')
         category = request.POST.get('boardgame_filter')
         table_sort_mode = request.POST.get('table_sort_mode')
-        capacity = request.POST.get('table_filter')
+        capacity = request.POST.get('table_filter')        
         
         return render(request, 'app/index.html', 
                     {'boardgame': BoardGame.get_sorted_data(boardgame_sort_mode, category),
@@ -112,6 +125,28 @@ class HomeView(generic.ListView):
             'boardgame': BoardGame.objects.all(),
             'table': Table.objects.all()
             }
+
+    def get_context_data(self, **kwargs):
+        """
+        Add custom context to the template.
+
+        (Use this method to sent the data that I want to results.html)
+        """
+        context = super().get_context_data(**kwargs)
+
+        category_list = []
+
+        for board in BoardGame.objects.all():
+            if board.category.category_name not in category_list:
+                category_list.append(board.category.category_name)
+
+        context['list_of_category'] = category_list
+
+        num_max = max([table.capacity for table in Table.objects.all()])
+
+        context['list_of_capacity'] = [i for i in range(1, num_max + 1)]
+
+        return context
 
 
 class RentView(generic.ListView):
@@ -153,30 +188,42 @@ class RentView(generic.ListView):
         def rent():
             item_type = request.POST['item_type']
             item_id = request.POST['item_id']
-            user = Customer.object.get(customer_id=request.session['customer_id'])
-            due_date = request.POST['due_date']
+            user = Customer.objects.get(customer_id=request.session['customer_id'])
+            try:
+                due_date_str = request.POST['due_date']
+                due_date = make_aware(datetime.strptime(due_date_str, "%Y-%m-%d"))
+            except ValueError:
+                messages.error(request, "Invalid due date format. Please use YYYY-MM-DD.")
+                return redirect('board_game_cafe:rent')
             
-            Booking.delete(item_type, item_id, self.user)
+            Booking.delete_if_exists(item_type, item_id, self.user)
 
             day_or_hour = 'hours' if item_type == 'Table' else 'days'
 
+            item = {'Table': Table, 'BoardGame': BoardGame}.get(item_type)
+
             if not Rental.is_good_due_date(due_date, item_type):
-                messages.warning(f"You can rent {item_type.lower()} {Table.max_rent_time} {day_or_hour} at a time.")
+                messages.warning(request, f"You can rent {item_type.lower()} {item.max_rent_time} {day_or_hour} at a time.")
                 return redirect_url
                 
             if not Rental.can_rent(user, item_type):
-                messages.warning(f"You can rent {Table.max_rent} {item_type.lower()} at a time.")
+                messages.warning(request, f"You can rent {item.max_rent} {item_type.lower()} at a time.")
                 return redirect_url
+            
+            if item_type == 'BoardGame':
+                try:
+                    BoardGame.objects.get(boardgame_id=item_id).rent_boardgame()
+                except ValueError:
+                    messages.warning(request, "This BoardGame has ran out of stock at the moment.")
+                    return redirect_url
 
             Rental.objects.create(customer=user,
                                     item_type=item_type,
                                     item_id=item_id,
                                     due_date=due_date
                                     )
-            if item_type == 'BoardGame':
-                BoardGame.objects.get(boardgame_id=item_id).rent_boardgame()
             
-            messages.info("Your rental order has been created.")
+            messages.info(request, "Your rental order has been created.")
 
             return redirect_url
 

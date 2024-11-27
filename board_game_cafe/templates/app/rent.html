@@ -131,6 +131,13 @@
         dueDateInput.value = endDate;
         form.appendChild(dueDateInput);
 
+        // Choose to Rent
+        const choose = document.createElement('input');
+        choose.type = 'hidden';
+        choose.name = 'what_do';
+        choose.value = 'rent';
+        form.appendChild(choose);
+
         // Submit the form
         document.body.appendChild(form);
         form.submit();
