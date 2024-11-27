@@ -87,6 +87,10 @@ class RentView(generic.ListView):
 
     context_object_name = 'item'
 
+    def get(self, request, *args, **kwargs):
+        self.user = Customer.objects.get(customer_id=request.session['customer_id'])
+        return super().get(request, *args, **kwargs)
+
     def post(self, request, *args, **kwargs):
         REDIRECT_URL = redirect('board_game_cafe:rent')
         item_type = request.POST['item_type']
@@ -124,8 +128,13 @@ class RentView(generic.ListView):
                                 due_date=due_date)
 
     def get_queryset(self):
+
+        renting = Rental.objects.filter(customer=self.user,
+                                        status="rented", item_type="BoardGame").values_list('item_id', flat=True)
+        not_available = BoardGame.objects.filter(stock=0).values_list('boardgame_id', flat=True)
+        
         return {
-            'boardgame': BoardGame.objects.filter(stock__gt=0),
+            'boardgame': BoardGame.objects.exclude(boardgame_id__in=list(renting)+list(not_available)),
             'table': [table.table_id
                       for table in Table.objects.all()
                       if table.is_available()]
