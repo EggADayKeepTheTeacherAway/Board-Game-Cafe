@@ -18,7 +18,7 @@ class Booking(models.Model):
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
     item_type = models.CharField(max_length=30, default=None)
     item_id = models.CharField(max_length=30, default=None)
-    status = models.CharField(max_length=30, default=None)
+    status = models.CharField(max_length=30, default='booked')
     
     class Meta:
         app_label = 'board_game_cafe'
