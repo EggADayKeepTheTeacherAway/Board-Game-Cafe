@@ -86,27 +86,10 @@ class HomeView(generic.ListView):
         category = request.POST.get('boardgame_filter')
         table_sort_mode = request.POST.get('table_sort_mode')
         capacity = request.POST.get('table_filter')
-
-        def get_sorted_boardgame(sort_mode, filter):
-            boardgame_obj = BoardGame.objects.all()
-            if filter:
-                boardgame_category = BoardGameCategory.objects.get(category_name=filter)
-                boardgame_obj = boardgame_obj.filter(category=boardgame_category)
-            if sort_mode:
-                boardgame_obj = boardgame_obj.order_by(sort_mode)
-            return boardgame_obj
-        
-        def get_sorted_table(sort_mode, filter):
-            table_obj = Table.objects.all()
-            if filter:
-                table_obj = table_obj.filter(capacity=filter)
-            if sort_mode:
-                table_obj = table_obj.order_by(sort_mode)
-            return table_obj
         
         return render(request, 'app/index.html', 
-                    {'boardgame': get_sorted_boardgame(boardgame_sort_mode, category),
-                     'table': get_sorted_table(table_sort_mode, capacity),
+                    {'boardgame': BoardGame.get_sorted_data(boardgame_sort_mode, category),
+                     'table': Table.get_sorted_data(table_sort_mode, capacity),
                      'my_table_book': Booking.objects.filter(customer=user, item_type='Table'),
                      'my_bg_book': Booking.objects.filter(customer=user, item_type='BoardGame'),
                      })
@@ -165,50 +148,26 @@ class RentView(generic.ListView):
             item_id = request.POST['item_id']
             user = Customer.object.get(customer_id=request.session['customer_id'])
             due_date = request.POST['due_date']
+            
+            Booking.delete(item_type, item_id, self.user)
 
-            def table_handler():
-                if (due_date - timezone.now()).hour > 6:
-                    messages.warning("You can rent table 6 hours at a time.")
+            day_or_hour = 'hours' if item_type == 'Table' else 'days'
+
+            if not Rental.is_good_due_date(due_date, item_type):
+                    messages.warning(f"You can rent {item_type.lower()} {Table.max_rent_time} {day_or_hour} at a time.")
                     return REDIRECT_URL
                 
-                if Rental.objects.filter(customer=user,
-                                        item_type="Table", status='rented').exists():
-                    messages.warning("You can rent 1 table at a time.")
-                    return REDIRECT_URL
-
-            def boardgame_handler():
-                if (due_date - timezone.now()).days > 9:
-                    messages.warning("You can rent boardgame 9 days at a time.")
-                    return REDIRECT_URL
-                
-                if Rental.objects.filter(customer=self.user,
-                                        item_type="BoardGame",
-                                        status='rented').count() >= 3:
-                    messages.warning("You can rent 3 boardgames at a time.")
-                    return REDIRECT_URL
-
-                BoardGame.objects.get(boardgame_id=item_id).rent_boardgame()
-            
-            booking_for_this_obj = Booking.objects.filter(item_id=item_id,
-                                item_type=item_type,
-                                customer=self.user)
-            
-            if booking_for_this_obj.exists():
-                booking_for_this_obj.get().delete()
-
-            handler = {
-                "Table": table_handler,
-                "BoardGame": boardgame_handler
-                }
-
-            response = handler.get(item_type)()
-            if response is not None:
-                return response
+            if not Rental.can_rent(user, item_type):
+                messages.warning(f"You can rent {Table.max_rent} {item_type.lower()} at a time.")
+                return REDIRECT_URL
 
             Rental.objects.create(customer=user,
                                     item_type=item_type,
                                     item_id=item_id,
-                                    due_date=due_date)
+                                    due_date=due_date
+                                    )
+            if item_type == 'BoardGame':
+                BoardGame.objects.get(boardgame_id=item_id).rent_boardgame()
             
             messages.info("Your rental order has been created.")
 
@@ -296,12 +255,13 @@ class ReturnView(generic.ListView):
             table: [`Table.objects`]
         }
         """
-
+        boardgame_rental = Rental.objects.filter(customer=self.user, item_type="BoardGame",
+                                               status='rented')
+        table_rental = Rental.objects.filter(customer=self.user, item_type="Table",
+                                               status='rented')
         return {
-            'boardgame': Rental.objects.filter(customer=self.user, item_type="BoardGame",
-                                               status='rented'),
-            'table': Rental.objects.filter(customer=self.user, item_type="Table",
-                                           status='rented'),
+            'boardgame': [boardgame.get_item() for boardgame in boardgame_rental],
+            'table': [table.get_item() for table in table_rental],
         }
 
 
