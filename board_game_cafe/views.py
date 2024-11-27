@@ -135,6 +135,7 @@ class RentView(generic.ListView):
 class ReturnView(generic.ListView):
     """Class for display return page."""
     template_name = "app/return.html"
+    context_object_name = 'data'
 
     def get(self, request, *args, **kwargs):
         self.user = Customer.objects.get(customer_id=request.session['customer_id'])
@@ -147,7 +148,12 @@ class ReturnView(generic.ListView):
             rental.get_item().return_boardgame()
 
     def get_queryset(self):
-        return Rental.objects.filter(customer=self.user, status='rented')
+        return {
+            'boardgame': Rental.objects.filter(customer=self.user, item_type="BoardGame",
+                                               status='rented'),
+            'table': Rental.objects.filter(customer=self.user, item_type="Table",
+                                           status='rented'),
+        }
 
 
 class StatView(generic.ListView):
@@ -198,7 +204,18 @@ class StatView(generic.ListView):
 class ProfileView(generic.ListView):
     """Class for display the profile of customer."""
     template_name = "app/profile.html"
+    context_object_name = 'data'
+
+    def get(self, request, *args, **kwargs):
+        self.user = Customer.objects.get(customer_id=request.session['customer_id'])
+        return super().get(request, *args, **kwargs)
 
     def get_queryset(self):
-        return []
+        return {
+            'id': self.user.customer_id,
+            'username': self.user.customer_name,
+            'contact': self.user.contact,
+            'total_fee': sum(Rental.objects.filter(customer=self.user,
+                                         status='returned').values_list('fee', flat=True))
+        }
     
