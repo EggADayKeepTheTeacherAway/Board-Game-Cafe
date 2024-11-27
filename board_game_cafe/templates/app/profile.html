@@ -7,11 +7,12 @@
             Customer Profile
         </legend>
 
-        ID: 01
-        User Name: Yes
-        Contact: ichiganer
-        Total Fee: 1000
-
+        <ul>
+            <li>ID: {{ data.id }} </li>
+            <li> User Name: {{ data.username }} </li>
+            <li> Contact: {{ data.contact }} </li>
+            <li> Total Fee: {{ data.total_fee }} </li>
+        </ul>
     </fieldset>
 </section>
 {% endblock %}
