@@ -36,7 +36,8 @@
                 <span class="category">Base Fee: {{ table.fee}} THB</span>
                   <form method="POST" action="{% url 'board_game_cafe:return' %}">
                     {% csrf_token %}
-                    <input type="hidden" name="{{ table.table_id }}" value="{{ table.table_id }}">
+                    <input type="hidden" name="item_id" value="{{ table.table_id }}">
+                    <input type="hidden" name="item_type" value="Table">
                     <button type="submit" class="button">return</button>
                 </form>
             </div>
