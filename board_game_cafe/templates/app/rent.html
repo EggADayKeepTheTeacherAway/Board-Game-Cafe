@@ -7,11 +7,17 @@
             Board Game
         </legend>
 
-        <div class="content">
-            <span class="name">Board Game Name 1</span>
-            <span class="aval">available</span>
-            <a href="#" onclick="handleRent('Board Game Name 1'); return false;" class="button">rent</a>
-        </div>
+        {% for book in item.boardgame %}
+            <div class="content">
+                <span class="name">Name: {{ book.boardgame_name }}</span>
+                <span class="category">Genre: {{ book.category.category_name }}</span>
+                <span class="category">Number of Player: {{ book.group.num_player }}</span>
+                <span class="category">Base Fee: {{ book.group.base_fee }} Baht / day</span>
+                <a href="#" onclick="handleRent('{{ book.boardgame_name }}', 'BoardGame', {{ book.boardgame_id }}); return false;" class="button">
+                    rent
+                </a>
+            </div>
+        {% endfor %}
     </fieldset>
 
     <fieldset class="table container">
@@ -19,11 +25,16 @@
             Table
         </legend>
 
-        <div class="content">
-            <span class="name">Table 1</span>
-            <span class="aval">available</span>
-            <a href="#" onclick="handleRent('Table 1'); return false;" class="button">rent</a>
-        </div>
+        {% for table in item.table %}
+            <div class="content">
+                <span class="name">Table {{ table.table_id }}</span>
+                <span class="capacity">Capacity: {{ table.capacity }}</span>
+                <span class="category">Base Fee: {{ table.fee }} Baht / day</span>
+                <a href="#" onclick="handleRent('Table {{ table.table_id }}', 'Table'c); return false;" class="button">
+                    rent
+                </a>
+            </div>
+        {% endfor %}
     </fieldset>
 </section>
 
@@ -33,16 +44,38 @@
 <!-- Popup Notification -->
 <div id="popup-notification" class="popup hidden">
     <p id="popup-message"></p>
-    <button onclick="closePopup()">Close</button>
+    <label for="end-date">Choose End Date:</label>
+    <input type="date" id="end-date" name="end-date" required>
+    <div>
+        <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+        <button onclick="confirmRent()">Confirm</button>
+        <button onclick="closePopup()">Cancel</button>
+    </div>
 </div>
 
 <script>
-    function showPopup(message) {
+    let currentItemName = '';
+    let currentItemType = '';
+
+    function showPopup(itemName, itemType, itemID) {
         const popup = document.getElementById('popup-notification');
         const popupMessage = document.getElementById('popup-message');
         const backdrop = document.getElementById('backdrop');
+        const endDateInput = document.getElementById('end-date');
 
-        popupMessage.textContent = message;
+        currentItemName = itemName;
+        currentItemType = itemType; // Set the current item type
+        currentItemID = itemID;
+        popupMessage.textContent = `You have selected to rent "${itemName}". Please choose an end date.`;
+
+        const today = new Date().toISOString().split('T')[0];
+        const maxDate = new Date();
+        maxDate.setDate(maxDate.getDate() + 9);
+        const maxDateString = maxDate.toISOString().split('T')[0];
+
+        endDateInput.min = today;
+        endDateInput.max = maxDateString;
+
         popup.classList.remove('hidden');
         backdrop.classList.remove('hidden');
     }
@@ -55,8 +88,60 @@
         backdrop.classList.add('hidden');
     }
 
-    function handleRent(itemName) {
-        showPopup(`You have successfully rented "${itemName}"!`);
+    function confirmRent() {
+        const endDateInput = document.getElementById('end-date');
+        const endDate = endDateInput.value;
+
+        if (!endDate) {
+            alert('Please select an end date before confirming!');
+            return;
+        }
+
+        // Create and submit the form dynamically
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '';
+
+        // Add CSRF token
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        const csrfInput = document.createElement('input');
+        csrfInput.type = 'hidden';
+        csrfInput.name = 'csrfmiddlewaretoken';
+        csrfInput.value = csrfToken;
+        form.appendChild(csrfInput);
+
+        // Add item type
+        const itemTypeInput = document.createElement('input');
+        itemTypeInput.type = 'hidden';
+        itemTypeInput.name = 'item_type';
+        itemTypeInput.value = currentItemType;
+        form.appendChild(itemTypeInput);
+
+        // Add item name
+        const itemNameInput = document.createElement('input');
+        itemNameInput.type = 'hidden';
+        itemNameInput.name = 'item_id';
+        itemNameInput.value = currentItemID;
+        form.appendChild(itemNameInput);
+
+        // Add due date
+        const dueDateInput = document.createElement('input');
+        dueDateInput.type = 'hidden';
+        dueDateInput.name = 'due_date';
+        dueDateInput.value = endDate;
+        form.appendChild(dueDateInput);
+
+        // Submit the form
+        document.body.appendChild(form);
+        form.submit();
+
+        alert(`You have successfully rented "${currentItemName}" until ${endDate}!`);
+        closePopup();
+    }
+
+    function handleRent(itemName, itemType, itemID) {
+        showPopup(itemName, itemType, itemID);
     }
 </script>
+
 {% endblock %}

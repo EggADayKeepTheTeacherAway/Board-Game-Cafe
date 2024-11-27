@@ -7,6 +7,8 @@ from django.db.models import F, Count
 from django.db.models.functions import ExtractWeekDay, ExtractHour
 from django.views import generic
 from django.utils import timezone
+from datetime import datetime
+from django.utils.timezone import make_aware, now
 from .models import (Rental, Table, BoardGame,
                      Customer, BoardGameCategory,
                      BoardGameGroup, Booking
@@ -119,6 +121,11 @@ class RentView(generic.ListView):
 
     context_object_name = 'item'
 
+    def __init__(self):
+        """Initailize method for Rent feature."""
+        super().__init__()
+        self.user = None
+
     def get(self, request, *args, **kwargs):
         self.user = Customer.objects.get(customer_id=request.session['customer_id'])
         return super().get(request, *args, **kwargs)
@@ -193,7 +200,6 @@ class RentView(generic.ListView):
         
         return what_do_handler.get(what_do)()
         
-
     def get_queryset(self):
         """
         Return dict consists of 2 datas: `boardgame`, and `table`.
@@ -211,7 +217,7 @@ class RentView(generic.ListView):
 
         return {
             'boardgame': BoardGame.objects.exclude(boardgame_id__in=list(renting)+list(not_available)),
-            'table': [table.table_id
+            'table': [table
                       for table in Table.objects.all()
                       if table.is_available()]
         }
