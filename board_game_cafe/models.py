@@ -68,11 +68,9 @@ class Rental(models.Model):
 
     @property
     def duration(self) -> int:
+        if self.item_type == 'Table':
+            return (timezone.now() - self.rent_date).hour
         return (timezone.now() - self.rent_date).days
-
-    @property
-    def duration_hour(self) -> int:
-        return (timezone.now() - self.rent_date).hour
 
     @classmethod
     def can_rent(cls, user, item_type):

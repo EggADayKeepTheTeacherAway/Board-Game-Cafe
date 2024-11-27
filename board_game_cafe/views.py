@@ -213,11 +213,19 @@ class RentView(generic.ListView):
             
             Booking.delete_if_exists(item_type, item_id, self.user)
 
+            if item_type == 'Table':
+                Rental.objects.create(customer=user,
+                                    item_type=item_type,
+                                    item_id=item_id,
+                                    due_date=timezone.now()+timezone.timedelta(hours=23, minutes=58, seconds=59)
+                                    )
+
             day_or_hour = 'hours' if item_type == 'Table' else 'days'
 
             item = {'Table': Table, 'BoardGame': BoardGame}.get(item_type)
 
-            if not Rental.is_good_due_date(due_date, item_type):
+
+            if not Rental.is_good_due_date_boardgame(due_date, item_type):
                 messages.warning(request, f"You can rent {item_type.lower()} {item.max_rent_time} {day_or_hour} at a time.")
                 return redirect_url
                 
