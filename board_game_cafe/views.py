@@ -81,6 +81,9 @@ class HomeView(generic.ListView):
         """
         POST DATA SCHEMA:
         {
+            item_type: str['Table' || 'BoardGame']
+            item_id: str|int
+
             boardgame_sort_mode: str['A-Z' || 'Popularity']
             boardgame_filter: str
             table_sortt_mode: str
@@ -88,10 +91,16 @@ class HomeView(generic.ListView):
         }
         """
         user = Customer.objects.get(customer_id=request.session['customer_id'])
+        item_type = request.POST.get('item_type')
+        item_id = request.POST.get('item_id')
+        
+        if item_type and item_id:
+            Booking.create_or_delete(item_type, item_id, user)
+
         boardgame_sort_mode = request.POST.get('boardgame_sort_mode')
         category = request.POST.get('boardgame_filter')
         table_sort_mode = request.POST.get('table_sort_mode')
-        capacity = request.POST.get('table_filter')
+        capacity = request.POST.get('table_filter')        
         
         return render(request, 'app/index.html', 
                     {'boardgame': BoardGame.get_sorted_data(boardgame_sort_mode, category),
@@ -200,14 +209,19 @@ class RentView(generic.ListView):
             if not Rental.can_rent(user, item_type):
                 messages.warning(request, f"You can rent {item.max_rent} {item_type.lower()} at a time.")
                 return redirect_url
+            
+            if item_type == 'BoardGame':
+                try:
+                    BoardGame.objects.get(boardgame_id=item_id).rent_boardgame()
+                except ValueError:
+                    messages.warning(request, "This BoardGame has ran out of stock at the moment.")
+                    return redirect_url
 
             Rental.objects.create(customer=user,
                                     item_type=item_type,
                                     item_id=item_id,
                                     due_date=due_date
                                     )
-            if item_type == 'BoardGame':
-                BoardGame.objects.get(boardgame_id=item_id).rent_boardgame()
             
             messages.info(request, "Your rental order has been created.")
 
