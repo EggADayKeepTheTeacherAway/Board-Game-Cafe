@@ -68,14 +68,17 @@ class Rental(models.Model):
 
     @classmethod
     def can_rent(cls, user, item_type):
-        return not Rental.objects.filter(customer=user,
-                        item_type=item_type, status='rented').count() < cls.max_rent
+        item = {'Table': Table, 'BoardGame': BoardGame}.get(item_type)
+        return Rental.objects.filter(customer=user,
+                    item_type=item_type, status='rented').count() < item.max_rent
     
     @classmethod
     def is_good_due_date(cls, due_date, item_type):
         item = {'Table': Table, 'BoardGame': BoardGame}.get(item_type)
         time_difference = due_date - timezone.now()
-        return time_difference.total_seconds() / 3600 > item.max_rent_time
+        time = {'Table': lambda t: t.total_seconds() / 3600,
+                'BoardGame': lambda t: t.total_seconds() / (3600*24) }
+        return time.get(item_type)(time_difference) / 3600 < item.max_rent_time
 
     @classmethod
     def create(cls, item_type, item_id, user, due_date):
