@@ -43,26 +43,23 @@ class Rental(models.Model):
     def duration(self) -> int:
         return (timezone.now() - self.rent_date).days
 
+    @property
+    def duration_hour(self) -> int:
+        return (timezone.now() - self.rent_date).hour
+
     def is_overdue(self):
         return not self.return_date or self.return_date > self.due_date
-
-    def compute_fee(self):
-        fee_handler = {"Table": 5,
-               "BoardGame": BoardGame.objects.get(
-                   boardgame_id=self.item_id).group.base_fee
-               }
-        fee = self.duration * fee_handler[self.item_type]
-        fee += max(0, fee_handler[self.item_type]*(self.duration-9)) # compute overdue fee
-        self.fee = fee
-        self.status = 'returned'
-        self.return_date = timezone.now()
-        self.save()
 
     def get_item(self):
         handle_item_type = {"Table": lambda id: Table.objects.get(table_id=id),
                      "BoardGame": lambda id: BoardGame.objects.get(boardgame_id=id)}
-        
         return handle_item_type[self.item_type](self.item_id)
+    
+    def compute_fee(self):
+        self.fee = self.get_item().compute_fee()
+        self.status = 'returned'
+        self.return_date = timezone.now()
+        self.save()
 
     class Meta:
         app_label = 'board_game_cafe'
@@ -72,10 +69,18 @@ class Rental(models.Model):
 class Table(models.Model):
     table_id = models.AutoField(primary_key=True, unique=True)
     capacity = models.IntegerField(default=4)
+    fee = 5
 
     def is_available(self):
         return self.table_id not in Rental.objects.filter(
             item_type='Table', status="rented").values_list('item_id', flat=True)
+    
+    def compute_fee(self, hours):
+        grace_period = min(hours, 6)
+        return (
+                hours * self.fee
+              + max(0, self.fee*(hours-grace_period))
+              )
 
 
 class BoardGameGroup(models.Model):
@@ -92,6 +97,7 @@ class BoardGame(models.Model):
     group = models.ForeignKey(BoardGameGroup, on_delete=models.CASCADE)
     category = models.ForeignKey(BoardGameCategory, on_delete=models.CASCADE)
     stock = models.IntegerField(default=0)
+    grace_period = 9
 
     def rent_boardgame(self):
         if self.stock <= 0:
@@ -102,3 +108,14 @@ class BoardGame(models.Model):
     def return_boardgame(self):
         self.stock += 1
         self.save()
+
+    @property
+    def fee(self):
+        return self.group.base_fee
+
+    def compute_fee(self, days):
+        grace_period = min(9, days)
+        return (
+                days * self.fee
+              + max(0, self.fee*(days-grace_period))
+              )
