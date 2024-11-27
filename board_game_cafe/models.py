@@ -20,6 +20,24 @@ class Booking(models.Model):
     item_id = models.CharField(max_length=30, default=None)
     status = models.CharField(max_length=30, default='booked')
     
+    @classmethod
+    def update_queue(cls, item_type, item_id):
+        next_booking_in_queue = Booking.objects.filter(item_type=item_type,
+                                  item_id=item_id,
+                                  )
+        if next_booking_in_queue.exists():
+            next_booking = next_booking_in_queue.get()
+            next_booking.status = 'rentable'
+            next_booking.save()
+
+    @classmethod
+    def delete_if_exists(cls, item_type, item_id, user):
+        booking_for_this_obj = Booking.objects.filter(item_id=item_id,
+                                item_type=item_type,
+                                customer=user)
+        if booking_for_this_obj.exists():
+            booking_for_this_obj.get().delete()
+
     class Meta:
         app_label = 'board_game_cafe'
         db_table = 'Booking'
@@ -48,12 +66,44 @@ class Rental(models.Model):
     def duration_hour(self) -> int:
         return (timezone.now() - self.rent_date).hour
 
+    @classmethod
+    def can_rent(cls, user, item_type):
+        return not Rental.objects.filter(customer=user,
+                        item_type=item_type, status='rented').count() < cls.max_rent
+    
+    @classmethod
+    def is_good_due_date(cls, due_date, item_type):
+        item = {'Table': Table, 'BoardGame': BoardGame}.get(item_type)
+        return (due_date - timezone.now()).hour > item.max_rent_time
+
+    @classmethod
+    def create(cls, item_type, item_id, user, due_date):
+        Booking.delete_if_exists(item_type, item_id, user)
+        day_or_hour = 'hours' if item_type == 'Table' else 'days'
+        item = {'Table': Table, 'BoardGame': BoardGame}.get(item_type)
+        if not Rental.is_good_due_date(due_date, item_type):
+            message = f"You can rent {item_type.lower()} {item.max_rent_time} {day_or_hour} at a time."
+            status = 'failed'
+            
+        if not Rental.can_rent(user, item_type):
+            message = f"You can rent {item.max_rent} {item_type.lower()} at a time."
+            status = 'failed'
+
+        Rental.objects.create(customer=user,
+                                item_type=item_type,
+                                item_id=item_id,
+                                due_date=due_date
+                                )
+        if item_type == 'BoardGame':
+            BoardGame.objects.get(boardgame_id=item_id).rent_boardgame()
+
     def is_overdue(self):
         return not self.return_date or self.return_date > self.due_date
 
     def get_item(self):
-        handle_item_type = {"Table": lambda id: Table.objects.get(table_id=id),
-                     "BoardGame": lambda id: BoardGame.objects.get(boardgame_id=id)}
+        handle_item_type = {
+                    "Table": lambda id: Table.objects.get(table_id=id),
+                    "BoardGame": lambda id: BoardGame.objects.get(boardgame_id=id)}
         return handle_item_type[self.item_type](self.item_id)
     
     def compute_fee(self):
@@ -70,7 +120,10 @@ class Rental(models.Model):
 class Table(models.Model):
     table_id = models.AutoField(primary_key=True, unique=True)
     capacity = models.IntegerField(default=4)
+
     fee = 5
+    max_rent_time = 6
+    max_rent = 1
 
     def is_available(self):
         return self.table_id not in Rental.objects.filter(
@@ -83,6 +136,15 @@ class Table(models.Model):
               + max(0, self.fee*(hours-grace_period))
               )
 
+    @classmethod
+    def get_sorted_data(cls, table_sort_mode, capacity):
+        table_obj = Table.objects.all()
+        if capacity:
+            table_obj = table_obj.filter(capacity=capacity)
+        if table_sort_mode:
+            table_obj = table_obj.order_by(table_sort_mode)
+        return table_obj
+    
 
 class BoardGameGroup(models.Model):
     group_name = models.CharField(max_length=30, default="small")
@@ -101,7 +163,23 @@ class BoardGame(models.Model):
     group = models.ForeignKey(BoardGameGroup, on_delete=models.CASCADE)
     category = models.ForeignKey(BoardGameCategory, on_delete=models.CASCADE)
     stock = models.IntegerField(default=0)
-    grace_period = 9
+
+    max_rent_time = 9
+    max_rent = 3
+
+    @property
+    def fee(self):
+        return self.group.base_fee
+    
+    @classmethod
+    def get_sorted_data(cls, boardgame_sort_mode, category):
+        boardgame_obj = BoardGame.objects.all()
+        if category:
+            boardgame_category = BoardGameCategory.objects.get(category_name=category)
+            boardgame_obj = boardgame_obj.filter(category=boardgame_category)
+        if boardgame_sort_mode:
+            boardgame_obj = boardgame_obj.order_by(boardgame_sort_mode)
+        return boardgame_obj
 
     def rent_boardgame(self):
         if self.stock <= 0:
@@ -113,13 +191,11 @@ class BoardGame(models.Model):
         self.stock += 1
         self.save()
 
-    @property
-    def fee(self):
-        return self.group.base_fee
-
     def compute_fee(self, days):
-        grace_period = min(9, days)
+        grace_period = min(self.max_rent_time, days)
         return (
                 days * self.fee
               + max(0, self.fee*(days-grace_period))
               )
+    
+   

@@ -73,6 +73,30 @@ class HomeView(generic.ListView):
     template_name = "app/index.html"
     context_object_name = "data"
 
+    def post(self, request, *args, **kwargs):
+        """
+        POST DATA SCHEMA:
+        {
+            boardgame_sort_mode: str['A-Z' || 'Popularity']
+            boardgame_filter: str
+            table_sortt_mode: str
+            table_filter: str
+        }
+        """
+        user = Customer.objects.get(customer_id=request.session['customer_id'])
+        boardgame_sort_mode = request.POST.get('boardgame_sort_mode')
+        category = request.POST.get('boardgame_filter')
+        table_sort_mode = request.POST.get('table_sort_mode')
+        capacity = request.POST.get('table_filter')
+        
+        return render(request, 'app/index.html', 
+                    {'boardgame': BoardGame.get_sorted_data(boardgame_sort_mode, category),
+                     'table': Table.get_sorted_data(table_sort_mode, capacity),
+                     'my_table_book': Booking.objects.filter(customer=user, item_type='Table'),
+                     'my_bg_book': Booking.objects.filter(customer=user, item_type='BoardGame'),
+                     })
+            
+
     def get_queryset(self):
         """
         Return dict consists of 2 datas: `boardgame`, and `table`.
@@ -110,66 +134,72 @@ class RentView(generic.ListView):
         """
         POST DATA SCHEMA:
         {
+            what_do: str['sort' || 'rent']
+
             item_type: str['Table' || 'BoardGame']
             item_id: str|int
-            due_date: str (YYYY-MM-DD)
+            due_date: Datetime? idk you tell me or give whatever I'll convert it
+
+            boardgame_sort_mode: str['A-Z' || 'Popularity']
+            boardgame_filter: str
+            table_sortt_mode: str
+            table_filter: str
         }
         """
+
         redirect_url = redirect('board_game_cafe:rent')
-        item_type = request.POST.get('item_type')
-        item_id = request.POST.get('item_id')
-        due_date_str = request.POST.get('due_date')  # Due date as string
-        user = Customer.objects.get(customer_id=request.session['customer_id'])
+        what_do = request.POST['what_do']
+        
+        def rent():
+            item_type = request.POST['item_type']
+            item_id = request.POST['item_id']
+            user = Customer.object.get(customer_id=request.session['customer_id'])
+            due_date = request.POST['due_date']
+            
+            Booking.delete(item_type, item_id, self.user)
 
-        try:
-            due_date = make_aware(datetime.strptime(due_date_str, "%Y-%m-%d"))
-        except ValueError:
-            messages.error(request, "Invalid due date format. Please use YYYY-MM-DD.")
+            day_or_hour = 'hours' if item_type == 'Table' else 'days'
+
+            if not Rental.is_good_due_date(due_date, item_type):
+                    messages.warning(f"You can rent {item_type.lower()} {Table.max_rent_time} {day_or_hour} at a time.")
+                    return REDIRECT_URL
+                
+            if not Rental.can_rent(user, item_type):
+                messages.warning(f"You can rent {Table.max_rent} {item_type.lower()} at a time.")
+                return REDIRECT_URL
+
+            Rental.objects.create(customer=user,
+                                    item_type=item_type,
+                                    item_id=item_id,
+                                    due_date=due_date
+                                    )
+            if item_type == 'BoardGame':
+                BoardGame.objects.get(boardgame_id=item_id).rent_boardgame()
+            
+            messages.info("Your rental order has been created.")
+
             return redirect_url
 
 
-        def table_handler():
-            if (due_date - now()).total_seconds() > 6 * 3600:  # 6 hours in seconds
-                messages.warning(request, "You can rent a table for a maximum of 6 hours at a time.")
-                return redirect_url
+        def sort():
+            boardgame_sort_mode = request.POST.get('boardgame_sort_mode')
+            category = request.POST.get('boardgame_filter')
+            table_sort_mode = request.POST.get('table_sort_mode')
+            capacity = request.POST.get('table_filter')
 
-            if Rental.objects.filter(customer=user, item_type="Table", status='rented').exists():
-                messages.warning(request, "You can rent only one table at a time.")
-                return redirect_url
+            boardgame_obj = BoardGame.get_sorted_data(boardgame_sort_mode, category)
 
-        def boardgame_handler():
-            if (due_date - now()).days > 9:  # Check if rental period exceeds 9 days
-                messages.warning(request, "You can rent a board game for a maximum of 9 days.")
-                return redirect_url
+            table_obj = Table.get_sorted_data(table_sort_mode, capacity)
+        
+            return render(request, 'app/index.html', 
+                    {'boardgame': boardgame_obj,
+                     'table': table_obj})
 
-            if Rental.objects.filter(customer=user, item_type="BoardGame", item_id=item_id).count() >= 3:
-                messages.warning(request, "You can rent up to 3 board games at a time.")
-                return redirect_url
-
-            # Update board game stock or other rental logic
-            BoardGame.objects.get(boardgame_id=item_id).rent_boardgame()
-
-        # Choose the appropriate handler
-        handler = {"Table": table_handler, "BoardGame": boardgame_handler}
-        if item_type not in handler:
-            messages.error(request, "Invalid item type.")
-            return redirect_url
-
-        response = handler[item_type]()
-        if response is not None:
-            return response
-
-        # Create the rental record
-        Rental.objects.create(
-            customer=user,
-            item_type=item_type,
-            item_id=item_id,
-            due_date=due_date
-        )
-
-        messages.success(request, f"Successfully rented {item_type} {item_id} until {due_date}.")
-        return redirect_url
-
+        what_do_handler = {'sort': sort,
+                           'rent': rent}
+        
+        return what_do_handler.get(what_do)()
+        
     def get_queryset(self):
         """
         Return dict consists of 2 datas: `boardgame`, and `table`.
@@ -212,17 +242,14 @@ class ReturnView(generic.ListView):
         rental = Rental.objects.get(rental_id=request.POST['rental_id'])
         item_type = rental.item_type
         item_id = rental.item_id
-        rental_fee = rental.compute_fee() # TODO: if have transaction THIS IS THE FEE.
+        rental_fee = rental.compute_fee()
         item = rental.get_item()
         if rental.item_type == 'BoardGame':
             item.return_boardgame()
-        next_booking_in_queue = Booking.objects.filter(item_type=item_type,
-                                  item_id=item_id,
-                                  )
-        if next_booking_in_queue.exists():
-            next_booking = next_booking_in_queue.get()
-            next_booking.status = 'rentable'
-            next_booking.save()
+        Booking.update_queue(item_type=item_type, item_id=item_id)
+        messages.info(f"There is {rental_fee} Baht fee for your rental.")
+        return render(request, self.template_name, self.get_queryset())
+        
 
     def get_queryset(self):
         """
@@ -235,11 +262,15 @@ class ReturnView(generic.ListView):
             table: [`Table.objects`]
         }
         """
+
+        boardgame_rental = Rental.objects.filter(customer=self.user, item_type="BoardGame",
+                                               status='rented')
+        table_rental = Rental.objects.filter(customer=self.user, item_type="Table",
+                                               status='rented')
+        
         return {
-            'boardgame': Rental.objects.filter(customer=self.user, item_type="BoardGame",
-                                               status='rented'),
-            'table': Rental.objects.filter(customer=self.user, item_type="Table",
-                                           status='rented'),
+            'boardgame': [boardgame.get_item() for boardgame in boardgame_rental],
+            'table': [table.get_item() for table in table_rental],
         }
 
 
@@ -270,14 +301,14 @@ class StatView(generic.ListView):
             .order_by('-rental_count')
             .values_list('item_id', flat=True)
                         )
-        
+
         peak_hour = (
             Rental.objects.filter(item_type="Table")
             .annotate(hour=ExtractHour('rent_date'))
             .values('hour')
             .annotate(table_rental=Count('hour'))
             .order_by('-table_rental')
-            .values_list('hour', flat=True)
+            .values_list('hour', flat=True).first()
         )
         week_day = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
         peak_day = (
@@ -287,18 +318,25 @@ class StatView(generic.ListView):
             .annotate(table_rental=Count('day'))
             .order_by('-table_rental')
             .values_list('day', flat=True)  # Get only the day
-        )
+        ).first()
+
+        if peak_day:
+            peak_day_output = week_day[peak_day]
+        else:
+            peak_day_output = None
 
         try:
-            output = {
-                "popular_boardgame": BoardGame.objects.get(boardgame_id=popular_boardgame[0]),
-                "top_boardgame": BoardGame.objects.filter(boardgame_id__in=popular_boardgame[:5]),
-                "peak_hour": peak_hour[0],
-                "peak_day": week_day[peak_day[0]],
-            }
+            popular =  BoardGame.objects.get(boardgame_id=popular_boardgame[0])
+        except BoardGame.DoesNotExist:
+            popular = None
 
-        except (IndexError, BoardGame.DoesNotExist):
-            return None
+        output = {
+            "popular_boardgame":popular,
+            "top_boardgame": BoardGame.objects.filter(boardgame_id__in=popular_boardgame[:5]),
+            "peak_hour": peak_hour,
+            "peak_day": peak_day_output,
+        }
+
 
         return output
 
