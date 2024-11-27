@@ -1,7 +1,7 @@
 from django.db import models
 from django.utils import timezone
 
-# Create your models here.
+
 class Customer(models.Model):
     customer_id = models.AutoField(primary_key=True, unique=True)
     customer_name = models.CharField(max_length=30, default=None)
@@ -27,6 +27,7 @@ class Booking(models.Model):
 
 def next_three_days():
     return timezone.now() + timezone.timedelta(days=3)
+
 
 class Rental(models.Model):
     rental_id = models.AutoField(primary_key=True, unique=True)
@@ -88,9 +89,11 @@ class BoardGameGroup(models.Model):
     base_fee = models.IntegerField(default=5)
     num_player = models.CharField(max_length=30, default="1-4 people")
 
+
 class BoardGameCategory(models.Model):
     category_id = models.AutoField(primary_key=True, unique=True)
     category_name = models.CharField(max_length=30, default="Dice")
+
 
 class BoardGame(models.Model):
     boardgame_id = models.AutoField(primary_key=True, unique=True)

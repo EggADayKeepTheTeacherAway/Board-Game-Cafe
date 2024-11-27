@@ -82,7 +82,6 @@ class HomeView(generic.ListView):
             table: [`Table.objects`]
         }
         """
-
         return {
             'boardgame': BoardGame.objects.all(),
             'table': Table.objects.all()
@@ -109,7 +108,7 @@ class RentView(generic.ListView):
             due_date: Datetime? idk you tell me or give whatever I'll convert it
         }
         """
-        REDIRECT_URL = redirect('board_game_cafe:rent')
+        redirect_url = redirect('board_game_cafe:rent')
         item_type = request.POST['item_type']
         item_id = request.POST['item_id']
         user = Customer.object.get(customer_id=request.session['customer_id'])
@@ -118,23 +117,24 @@ class RentView(generic.ListView):
         def table_handler():
             if (due_date - timezone.now()).hour > 6:
                 messages.warning("You can rent table 6 hours at a time.")
-                return REDIRECT_URL
+                return redirect_url
             
             if Rental.objects.filter(customer=user,
                                      item_type="Table", status='rented').exists():
                 messages.warning("You can rent 1 table at a time.")
-                return REDIRECT_URL
+                return redirect_url
 
         def boardgame_handler():
             if (due_date - timezone.now()).days > 9:
                 messages.warning("You can rent boardgame 9 days at a time.")
-                return REDIRECT_URL
+                return redirect_url
+
             
             if Rental.objects.filter(customer=self.user,
                                      item_type="BoardGame",
                                      item_id=item_id).count() >= 3:
                 messages.warning("You can rent 3 boardgames at a time.")
-                return REDIRECT_URL
+                return redirect_url
 
             BoardGame.objects.get(boardgame_id=item_id).rent_boardgame()
 
@@ -217,7 +217,6 @@ class ReturnView(generic.ListView):
             table: [`Table.objects`]
         }
         """
-
         return {
             'boardgame': Rental.objects.filter(customer=self.user, item_type="BoardGame",
                                                status='rented'),
@@ -309,7 +308,6 @@ class ProfileView(generic.ListView):
             total_fee: fee
         }
         """
-
         return {
             'id': self.user.customer_id,
             'username': self.user.customer_name,
