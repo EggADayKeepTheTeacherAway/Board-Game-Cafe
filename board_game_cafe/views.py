@@ -111,7 +111,7 @@ class RentView(generic.ListView):
         redirect_url = redirect('board_game_cafe:rent')
         item_type = request.POST['item_type']
         item_id = request.POST['item_id']
-        user = Customer.object.get(customer_id=request.session['customer_id'])
+        user = Customer.objects.get(customer_id=request.session['customer_id'])
         due_date = request.POST['due_date']
 
         def table_handler():
