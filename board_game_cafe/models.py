@@ -38,6 +38,14 @@ class Booking(models.Model):
         if booking_for_this_obj.exists():
             booking_for_this_obj.get().delete()
 
+    @classmethod
+    def create_or_delete(cls, item_type, item_id, user):
+        booking = Booking.objects.filter(item_type=item_type, item_id=item_id, customer=user)
+        if booking.exists():
+            booking.delete()
+            return
+        Booking.objects.create(item_type=item_type, item_id=item_id, customer=user)
+
     class Meta:
         app_label = 'board_game_cafe'
         db_table = 'Booking'
