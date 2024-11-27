@@ -72,6 +72,16 @@ class HomeView(generic.ListView):
     context_object_name = "data"
 
     def get_queryset(self):
+        """
+        Return dict consists of 2 datas: `boardgame`, and `table`.
+        
+        context_object_name = `data`
+
+        data = {
+            boardgame: [`BoardGame.objects`]
+            table: [`Table.objects`]
+        }
+        """
 
         return {
             'boardgame': BoardGame.objects.all(),
@@ -85,6 +95,10 @@ class RentView(generic.ListView):
     template_name = "app/rent.html"
 
     context_object_name = 'item'
+
+    def get(self, request, *args, **kwargs):
+        self.user = Customer.objects.get(customer_id=request.session['customer_id'])
+        return super().get(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
         REDIRECT_URL = redirect('board_game_cafe:rent')
@@ -123,8 +137,22 @@ class RentView(generic.ListView):
                                 due_date=due_date)
 
     def get_queryset(self):
+        """
+        Return dict consists of 2 datas: `boardgame`, and `table`.
+        
+        context_object_name = `item`
+
+        item = {
+            boardgame: [`BoardGame.objects`]
+            table: [`Table.objects`]
+        }
+        """
+        renting = Rental.objects.filter(customer=self.user,
+                                        status="rented", item_type="BoardGame").values_list('item_id', flat=True)
+        not_available = BoardGame.objects.filter(stock=0).values_list('boardgame_id', flat=True)
+
         return {
-            'boardgame': BoardGame.objects.filter(stock__gt=0),
+            'boardgame': BoardGame.objects.exclude(boardgame_id__in=list(renting)+list(not_available)),
             'table': [table.table_id
                       for table in Table.objects.all()
                       if table.is_available()]
@@ -147,6 +175,17 @@ class ReturnView(generic.ListView):
             rental.get_item().return_boardgame()
 
     def get_queryset(self):
+        """
+        Return dict consists of 2 datas: `boardgame`, and `table`.
+        
+        context_object_name = `data`
+
+        data = {
+            boardgame: [`BoardGame.objects`]
+            table: [`Table.objects`]
+        }
+        """
+
         return {
             'boardgame': Rental.objects.filter(customer=self.user, item_type="BoardGame",
                                                status='rented'),
@@ -161,6 +200,20 @@ class StatView(generic.ListView):
     context_object_name = 'data'
 
     def get_queryset(self):
+        """
+        Return dict consists of 4 datas: 
+            `popular_boardgame`, `top_boardgame`, `peak_hour`, and `peak_day`.
+        
+        context_object_name = `data`
+
+        data = {
+            popular_boardgame: `BoardGame.objects`
+            top_boardgame: [`BoardGame.objects`]
+            peak_hour: int
+            peak_day: str
+        }
+        """
+
         popular_boardgame = (
             Rental.objects.filter(item_type="BoardGame")
             .values('item_id')
@@ -187,11 +240,6 @@ class StatView(generic.ListView):
             .values_list('day', flat=True)  # Get only the day
         )
 
-        print('hnelo')
-        print(popular_boardgame)
-        print(peak_hour)
-        print(peak_day)
-
         try:
             output = {
                 "popular_boardgame": BoardGame.objects.get(boardgame_id=popular_boardgame[0]),
@@ -216,6 +264,20 @@ class ProfileView(generic.ListView):
         return super().get(request, *args, **kwargs)
 
     def get_queryset(self):
+        """
+        Return dict consists of 4 datas: 
+            `id`, `username`, `contact`, and `total_fee`.
+        
+        context_object_name = `data`
+
+        data = {
+            id: int
+            username: str
+            contact: str
+            total_fee: fee
+        }
+        """
+
         return {
             'id': self.user.customer_id,
             'username': self.user.customer_name,
