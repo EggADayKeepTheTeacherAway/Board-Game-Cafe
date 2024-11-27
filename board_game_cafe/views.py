@@ -294,7 +294,7 @@ class ReturnView(generic.ListView):
         if rental.item_type == 'BoardGame':
             item.return_boardgame()
         Booking.update_queue(item_type=item_type, item_id=item_id)
-        messages.info(f"There is {rental_fee} Baht fee for your rental.")
+        messages.info(request, f"There is {rental_fee} Baht fee for your rental.")
         return render(request, self.template_name, self.get_queryset())
         
 
