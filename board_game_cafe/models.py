@@ -20,6 +20,16 @@ class Booking(models.Model):
     item_id = models.CharField(max_length=30, default=None)
     status = models.CharField(max_length=30, default='booked')
     
+    @classmethod
+    def update_queue(cls, item_type, item_id):
+        next_booking_in_queue = Booking.objects.filter(item_type=item_type,
+                                  item_id=item_id,
+                                  )
+        if next_booking_in_queue.exists():
+            next_booking = next_booking_in_queue.get()
+            next_booking.status = 'rentable'
+            next_booking.save()
+
     class Meta:
         app_label = 'board_game_cafe'
         db_table = 'Booking'
@@ -82,6 +92,15 @@ class Table(models.Model):
               + max(0, self.fee*(hours-grace_period))
               )
 
+    @classmethod
+    def get_sorted_data(cls, table_sort_mode, capacity):
+        table_obj = Table.objects.all()
+        if capacity:
+            table_obj = table_obj.filter(capacity=capacity)
+        if table_sort_mode:
+            table_obj = table_obj.order_by(table_sort_mode)
+        return table_obj
+    
 
 class BoardGameGroup(models.Model):
     group_name = models.CharField(max_length=30, default="small")
@@ -120,3 +139,12 @@ class BoardGame(models.Model):
                 days * self.fee
               + max(0, self.fee*(days-grace_period))
               )
+    @classmethod
+    def get_sorted_data(cls, boardgame_sort_mode, category):
+        boardgame_obj = BoardGame.objects.all()
+        if category:
+            boardgame_category = BoardGameCategory.objects.get(category_name=category)
+            boardgame_obj = boardgame_obj.filter(category=boardgame_category)
+        if boardgame_sort_mode:
+            boardgame_obj = boardgame_obj.order_by(boardgame_sort_mode)
+        return boardgame_obj

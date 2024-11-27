@@ -183,7 +183,7 @@ class RentView(generic.ListView):
                 
                 if Rental.objects.filter(customer=self.user,
                                         item_type="BoardGame",
-                                        item_id=item_id).count() >= 3:
+                                        status='rented').count() >= 3:
                     messages.warning("You can rent 3 boardgames at a time.")
                     return REDIRECT_URL
 
@@ -192,6 +192,7 @@ class RentView(generic.ListView):
             booking_for_this_obj = Booking.objects.filter(item_id=item_id,
                                 item_type=item_type,
                                 customer=self.user)
+            
             if booking_for_this_obj.exists():
                 booking_for_this_obj.get().delete()
 
@@ -219,19 +220,9 @@ class RentView(generic.ListView):
             table_sort_mode = request.POST.get('table_sort_mode')
             capacity = request.POST.get('table_filter')
 
-            boardgame_obj = BoardGame.objects.all()
-            if category:
-                boardgame_category = BoardGameCategory.objects.get(category_name=category)
-                boardgame_obj = boardgame_obj.filter(category=boardgame_category)
-            if boardgame_sort_mode:
-                boardgame_obj = boardgame_obj.order_by(boardgame_sort_mode)
+            boardgame_obj = BoardGame.get_sorted_data(boardgame_sort_mode, category)
 
-            table_obj = Table.objects.all()
-            if capacity:
-                table_obj = table_obj.filter(capacity=capacity)
-            if table_sort_mode:
-                table_obj = table_obj.order_by(table_sort_mode)
-
+            table_obj = Table.get_sorted_data(table_sort_mode, capacity)
         
             return render(request, 'app/index.html', 
                     {'boardgame': boardgame_obj,
@@ -285,17 +276,14 @@ class ReturnView(generic.ListView):
         rental = Rental.objects.get(rental_id=request.POST['rental_id'])
         item_type = rental.item_type
         item_id = rental.item_id
-        rental_fee = rental.compute_fee() # TODO: if have transaction THIS IS THE FEE.
+        rental_fee = rental.compute_fee()
         item = rental.get_item()
         if rental.item_type == 'BoardGame':
             item.return_boardgame()
-        next_booking_in_queue = Booking.objects.filter(item_type=item_type,
-                                  item_id=item_id,
-                                  )
-        if next_booking_in_queue.exists():
-            next_booking = next_booking_in_queue.get()
-            next_booking.status = 'rentable'
-            next_booking.save()
+        Booking.update_queue(item_type=item_type, item_id=item_id)
+        messages.info(f"There is {rental_fee} Baht fee for your rental.")
+        return render(request, self.template_name, self.get_queryset())
+        
 
     def get_queryset(self):
         """
