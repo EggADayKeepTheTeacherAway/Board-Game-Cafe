@@ -8,16 +8,17 @@
         </legend>
 
         <ul>
-            <li><strong>Most Popular Board Game Category:</strong> Fantasy</li>
+            <li><strong>Most Popular Board Game Category:</strong> {{ data.popular_boardgame.boardgame_name }}</li>
             <li>
                 <strong>Top 5 Most Rented Board Games:</strong>
                 <ol>
-                    <li>D&D</li>
-                    <li>UMO</li>
+                    {% for top in data.top_boardgame %}
+                        <li>{{ top.boardgame_name }}</li>
+                    {% endfor %}
                 </ol>
             </li>
-            <li><strong>Peak Hour for Table Booking:</strong> 12:30 PM</li>
-            <li><strong>Most Popular Table Booking Day:</strong> Monday</li>
+            <li><strong>Peak Hour for Table Booking:</strong> {{ data.peak_hour }}</li>
+            <li><strong>Most Popular Table Booking Day:</strong> {{ data.peak_hour }}</li>
         </ul>
 
     </fieldset>

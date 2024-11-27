@@ -252,14 +252,14 @@ class StatView(generic.ListView):
             .order_by('-rental_count')
             .values_list('item_id', flat=True)
                         )
-        
+
         peak_hour = (
             Rental.objects.filter(item_type="Table")
             .annotate(hour=ExtractHour('rent_date'))
             .values('hour')
             .annotate(table_rental=Count('hour'))
             .order_by('-table_rental')
-            .values_list('hour', flat=True)
+            .values_list('hour', flat=True).first()
         )
         week_day = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
         peak_day = (
@@ -269,18 +269,25 @@ class StatView(generic.ListView):
             .annotate(table_rental=Count('day'))
             .order_by('-table_rental')
             .values_list('day', flat=True)  # Get only the day
-        )
+        ).first()
+
+        if peak_day:
+            peak_day_output = week_day[peak_day]
+        else:
+            peak_day_output = None
 
         try:
-            output = {
-                "popular_boardgame": BoardGame.objects.get(boardgame_id=popular_boardgame[0]),
-                "top_boardgame": BoardGame.objects.filter(boardgame_id__in=popular_boardgame[:5]),
-                "peak_hour": peak_hour[0],
-                "peak_day": week_day[peak_day[0]],
-            }
+            popular =  BoardGame.objects.get(boardgame_id=popular_boardgame[0])
+        except BoardGame.DoesNotExist:
+            popular = None
 
-        except (IndexError, BoardGame.DoesNotExist):
-            return None
+        output = {
+            "popular_boardgame":popular,
+            "top_boardgame": BoardGame.objects.filter(boardgame_id__in=popular_boardgame[:5]),
+            "peak_hour": peak_hour,
+            "peak_day": peak_day_output,
+        }
+
 
         return output
 
