@@ -286,7 +286,12 @@ class ReturnView(generic.ListView):
             rental_id: str|int
         }
         """
-        rental = Rental.objects.get(rental_id=request.POST['rental_id'])
+        user = Customer.objects.get(customer_id=request.session['customer_id'])
+        rental = Rental.objects.get(
+            item_type=request.POST['item_type'],
+            item_id=request.POST['item_id'],
+            customer=user
+        )
         item_type = rental.item_type
         item_id = rental.item_id
         rental_fee = rental.compute_fee()

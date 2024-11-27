@@ -93,7 +93,7 @@ fieldset {
 
 .content {
     display: grid;
-    grid-template-columns: 20% 20% 20% 20% 20%;
+    grid-template-columns: repeat(6, 16%);
 
 
     background-color: #f1f1f1;

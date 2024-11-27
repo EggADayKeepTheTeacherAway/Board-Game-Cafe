@@ -17,8 +17,23 @@
                     {% endfor %}
                 </ol>
             </li>
-            <li><strong>Peak Hour for Table Booking:</strong> {{ data.peak_hour }}</li>
-            <li><strong>Most Popular Table Booking Day:</strong> {{ data.peak_hour }}</li>
+            <li>
+                <strong>Peak Hour for Table Booking:</strong>
+                {% if data.peak_hour is not None %}
+                    {% if data.peak_hour == 0 %}
+                        12 AM
+                    {% elif data.peak_hour < 12 %}
+                        {{ data.peak_hour }} AM
+                    {% elif data.peak_hour == 12 %}
+                        12 PM
+                    {% else %}
+                        {{ data.peak_hour|add:"-12" }} PM
+                    {% endif %}
+                {% else %}
+                    No data available
+                {% endif %}
+            </li>
+            <li><strong>Most Popular Table Booking Day:</strong> {{ data.peak_day }}</li>
         </ul>
 
     </fieldset>
