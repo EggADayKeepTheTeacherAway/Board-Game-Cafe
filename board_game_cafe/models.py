@@ -18,7 +18,7 @@ class Booking(models.Model):
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
     item_type = models.CharField(max_length=30, default=None)
     item_id = models.CharField(max_length=30, default=None)
-    status = models.CharField(max_length=30, default=None)
+    status = models.CharField(max_length=30, default='booked')
     
     class Meta:
         app_label = 'board_game_cafe'
@@ -87,6 +87,7 @@ class Table(models.Model):
 class BoardGameGroup(models.Model):
     group_name = models.CharField(max_length=30, default="small")
     base_fee = models.IntegerField(default=5)
+    num_player = models.CharField(max_length=30, default="1-4 people")
 
 
 class BoardGameCategory(models.Model):
