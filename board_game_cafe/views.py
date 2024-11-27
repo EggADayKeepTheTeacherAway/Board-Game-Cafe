@@ -81,6 +81,7 @@ class HomeView(generic.ListView):
             table_filter: str
         }
         """
+        user = Customer.objects.get(customer_id=request.session['customer_id'])
         boardgame_sort_mode = request.POST.get('boardgame_sort_mode')
         category = request.POST.get('boardgame_filter')
         table_sort_mode = request.POST.get('table_sort_mode')
@@ -103,11 +104,12 @@ class HomeView(generic.ListView):
                 table_obj = table_obj.order_by(sort_mode)
             return table_obj
         
-
-        
         return render(request, 'app/index.html', 
                     {'boardgame': get_sorted_boardgame(boardgame_sort_mode, category),
-                     'table': get_sorted_table(table_sort_mode, capacity)})
+                     'table': get_sorted_table(table_sort_mode, capacity),
+                     'my_table_book': Booking.objects.filter(customer=user, item_type='Table'),
+                     'my_bg_book': Booking.objects.filter(customer=user, item_type='BoardGame'),
+                     })
             
 
     def get_queryset(self):
@@ -143,53 +145,103 @@ class RentView(generic.ListView):
         """
         POST DATA SCHEMA:
         {
+            what_do: str['sort' || 'rent']
+
             item_type: str['Table' || 'BoardGame']
             item_id: str|int
             due_date: Datetime? idk you tell me or give whatever I'll convert it
+
+            boardgame_sort_mode: str['A-Z' || 'Popularity']
+            boardgame_filter: str
+            table_sortt_mode: str
+            table_filter: str
         }
         """
         REDIRECT_URL = redirect('board_game_cafe:rent')
-        item_type = request.POST['item_type']
-        item_id = request.POST['item_id']
-        user = Customer.object.get(customer_id=request.session['customer_id'])
-        due_date = request.POST['due_date']
+        what_do = request.POST['what_do']
+        
+        def rent():
+            item_type = request.POST['item_type']
+            item_id = request.POST['item_id']
+            user = Customer.object.get(customer_id=request.session['customer_id'])
+            due_date = request.POST['due_date']
 
-        def table_handler():
-            if (due_date - timezone.now()).hour > 6:
-                messages.warning("You can rent table 6 hours at a time.")
-                return REDIRECT_URL
+            def table_handler():
+                if (due_date - timezone.now()).hour > 6:
+                    messages.warning("You can rent table 6 hours at a time.")
+                    return REDIRECT_URL
+                
+                if Rental.objects.filter(customer=user,
+                                        item_type="Table", status='rented').exists():
+                    messages.warning("You can rent 1 table at a time.")
+                    return REDIRECT_URL
+
+            def boardgame_handler():
+                if (due_date - timezone.now()).days > 9:
+                    messages.warning("You can rent boardgame 9 days at a time.")
+                    return REDIRECT_URL
+                
+                if Rental.objects.filter(customer=self.user,
+                                        item_type="BoardGame",
+                                        item_id=item_id).count() >= 3:
+                    messages.warning("You can rent 3 boardgames at a time.")
+                    return REDIRECT_URL
+
+                BoardGame.objects.get(boardgame_id=item_id).rent_boardgame()
             
-            if Rental.objects.filter(customer=user,
-                                     item_type="Table", status='rented').exists():
-                messages.warning("You can rent 1 table at a time.")
-                return REDIRECT_URL
-
-        def boardgame_handler():
-            if (due_date - timezone.now()).days > 9:
-                messages.warning("You can rent boardgame 9 days at a time.")
-                return REDIRECT_URL
-            
-            if Rental.objects.filter(customer=self.user,
-                                     item_type="BoardGame",
-                                     item_id=item_id).count() >= 3:
-                messages.warning("You can rent 3 boardgames at a time.")
-                return REDIRECT_URL
-
-            BoardGame.objects.get(boardgame_id=item_id).rent_boardgame()
-
-        handler = {"Table": table_handler,
-                   "BoardGame": boardgame_handler}
-        Booking.objects.filter(item_id=item_id,
-                               item_type=item_type,
-                               customer=self.user)
-        response = handler.get(item_type)()
-        if response is not None:
-            return response
-
-        Rental.objects.create(customer=user,
+            booking_for_this_obj = Booking.objects.filter(item_id=item_id,
                                 item_type=item_type,
-                                item_id=item_id,
-                                due_date=due_date)
+                                customer=self.user)
+            if booking_for_this_obj.exists():
+                booking_for_this_obj.get().delete()
+
+            handler = {
+                "Table": table_handler,
+                "BoardGame": boardgame_handler
+                }
+
+            response = handler.get(item_type)()
+            if response is not None:
+                return response
+
+            Rental.objects.create(customer=user,
+                                    item_type=item_type,
+                                    item_id=item_id,
+                                    due_date=due_date)
+            
+            messages.info("Your rental order has been created.")
+
+            return REDIRECT_URL
+
+        def sort():
+            boardgame_sort_mode = request.POST.get('boardgame_sort_mode')
+            category = request.POST.get('boardgame_filter')
+            table_sort_mode = request.POST.get('table_sort_mode')
+            capacity = request.POST.get('table_filter')
+
+            boardgame_obj = BoardGame.objects.all()
+            if category:
+                boardgame_category = BoardGameCategory.objects.get(category_name=category)
+                boardgame_obj = boardgame_obj.filter(category=boardgame_category)
+            if boardgame_sort_mode:
+                boardgame_obj = boardgame_obj.order_by(boardgame_sort_mode)
+
+            table_obj = Table.objects.all()
+            if capacity:
+                table_obj = table_obj.filter(capacity=capacity)
+            if table_sort_mode:
+                table_obj = table_obj.order_by(table_sort_mode)
+
+        
+            return render(request, 'app/index.html', 
+                    {'boardgame': boardgame_obj,
+                     'table': table_obj})
+
+        what_do_handler = {'sort': sort,
+                           'rent': rent}
+        
+        return what_do_handler.get(what_do)()
+        
 
     def get_queryset(self):
         """
