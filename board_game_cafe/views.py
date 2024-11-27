@@ -154,12 +154,12 @@ class RentView(generic.ListView):
             day_or_hour = 'hours' if item_type == 'Table' else 'days'
 
             if not Rental.is_good_due_date(due_date, item_type):
-                    messages.warning(f"You can rent {item_type.lower()} {Table.max_rent_time} {day_or_hour} at a time.")
-                    return REDIRECT_URL
+                messages.warning(f"You can rent {item_type.lower()} {Table.max_rent_time} {day_or_hour} at a time.")
+                return redirect_url
                 
             if not Rental.can_rent(user, item_type):
                 messages.warning(f"You can rent {Table.max_rent} {item_type.lower()} at a time.")
-                return REDIRECT_URL
+                return redirect_url
 
             Rental.objects.create(customer=user,
                                     item_type=item_type,
