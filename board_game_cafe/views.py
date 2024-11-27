@@ -9,7 +9,7 @@ from django.views import generic
 from django.utils import timezone
 from .models import (Rental, Table, BoardGame,
                      Customer, BoardGameCategory,
-                     BoardGameGroup,
+                     BoardGameGroup, Booking
                      )
 
 
@@ -101,6 +101,14 @@ class RentView(generic.ListView):
         return super().get(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """
+        POST DATA SCHEMA:
+        {
+            item_type: str['Table' || 'BoardGame']
+            item_id: str|int
+            due_date: Datetime? idk you tell me or give whatever I'll convert it
+        }
+        """
         REDIRECT_URL = redirect('board_game_cafe:rent')
         item_type = request.POST['item_type']
         item_id = request.POST['item_id']
@@ -113,7 +121,7 @@ class RentView(generic.ListView):
                 return REDIRECT_URL
             
             if Rental.objects.filter(customer=user,
-                                     item_type="table").count() >= 1:
+                                     item_type="Table", status='rented').exists():
                 messages.warning("You can rent 1 table at a time.")
                 return REDIRECT_URL
 
@@ -121,12 +129,20 @@ class RentView(generic.ListView):
             if (due_date - timezone.now()).days > 9:
                 messages.warning("You can rent boardgame 9 days at a time.")
                 return REDIRECT_URL
+            
+            if Rental.objects.filter(customer=self.user,
+                                     item_type="BoardGame",
+                                     item_id=item_id).count() >= 3:
+                messages.warning("You can rent 3 boardgames at a time.")
+                return REDIRECT_URL
 
             BoardGame.objects.get(boardgame_id=item_id).rent_boardgame()
 
         handler = {"Table": table_handler,
                    "BoardGame": boardgame_handler}
-        
+        Booking.objects.filter(item_id=item_id,
+                               item_type=item_type,
+                               customer=self.user)
         response = handler.get(item_type)()
         if response is not None:
             return response
@@ -169,10 +185,26 @@ class ReturnView(generic.ListView):
         return super().get(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """
+        POST DATA SCHEMA:
+        {
+            rental_id: str|int
+        }
+        """
         rental = Rental.objects.get(rental_id=request.POST['rental_id'])
+        item_type = rental.item_type
+        item_id = rental.item_id
         rental_fee = rental.compute_fee() # TODO: if have transaction THIS IS THE FEE.
+        item = rental.get_item()
         if rental.item_type == 'BoardGame':
-            rental.get_item().return_boardgame()
+            item.return_boardgame()
+        next_booking_in_queue = Booking.objects.filter(item_type=item_type,
+                                  item_id=item_id,
+                                  )
+        if next_booking_in_queue.exists():
+            next_booking = next_booking_in_queue.get()
+            next_booking.status = 'rentable'
+            next_booking.save()
 
     def get_queryset(self):
         """
