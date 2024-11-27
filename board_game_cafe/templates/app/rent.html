@@ -7,10 +7,17 @@
             Board Game
         </legend>
 
+        {% for book in item.boardgame %}
+            <div class="content">
+                <span class="name">Name: {{ book.boardgame_name }}</span>
+                <span class="category">Genre: {{ book.category.category_name }}</span>
+                <span class="category">Number of Player: {{ book.group.num_player }}</span>
+                <span class="category">Base Fee: {{ book.group.base_fee }} Baht / day</span>
+                <a href="#" onclick="handleRent('Board Game Name 1'); return false;" class="button">rent</a>
+            </div>
+        {% endfor %}
         <div class="content">
-            <span class="name">Board Game Name 1</span>
-            <span class="aval">available</span>
-            <a href="#" onclick="handleRent('Board Game Name 1'); return false;" class="button">rent</a>
+
         </div>
     </fieldset>
 
@@ -19,11 +26,15 @@
             Table
         </legend>
 
-        <div class="content">
-            <span class="name">Table 1</span>
-            <span class="aval">available</span>
-            <a href="#" onclick="handleRent('Table 1'); return false;" class="button">rent</a>
-        </div>
+         {% for table in item.table %}
+            <div class="content">
+                <span class="name">Table {{ table.table_id }}</span>
+                <span class="capacity">Capacity: {{ table.capacity }}</span>
+                <span class="category">Base Fee: {{ table.fee}}  Baht / day</span>
+                <a href="#" onclick="handleRent('Table 1'); return false;" class="button">rent</a>
+            </div>
+        {% endfor %}
+
     </fieldset>
 </section>
 

@@ -169,7 +169,7 @@ class RentView(generic.ListView):
 
         return {
             'boardgame': BoardGame.objects.exclude(boardgame_id__in=list(renting)+list(not_available)),
-            'table': [table.table_id
+            'table': [table
                       for table in Table.objects.all()
                       if table.is_available()]
         }
