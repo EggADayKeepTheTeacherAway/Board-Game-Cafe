@@ -1,0 +1,30 @@
+[
+{
+  "model": "board_game_cafe.rental",
+  "pk": 1,
+  "fields": {
+    "customer": 1,
+    "item_type": "BoardGame",
+    "item_id": "1",
+    "rent_date": "2024-11-26T22:28:47.112Z",
+    "due_date": "2024-11-29T22:28:47.113Z",
+    "status": "rented",
+    "return_date": null,
+    "fee": null
+  }
+},
+{
+  "model": "board_game_cafe.rental",
+  "pk": 2,
+  "fields": {
+    "customer": 1,
+    "item_type": "Table",
+    "item_id": "1",
+    "rent_date": "2024-11-26T23:47:36.461Z",
+    "due_date": "2024-11-29T23:47:36.461Z",
+    "status": "rented",
+    "return_date": null,
+    "fee": null
+  }
+}
+]

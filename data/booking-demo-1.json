@@ -1,0 +1,22 @@
+[
+{
+  "model": "board_game_cafe.booking",
+  "pk": 1,
+  "fields": {
+    "customer": 1,
+    "item_type": "BoardGame",
+    "item_id": "1",
+    "status": "booked"
+  }
+},
+{
+  "model": "board_game_cafe.booking",
+  "pk": 2,
+  "fields": {
+    "customer": 1,
+    "item_type": "Table",
+    "item_id": "1",
+    "status": "booked"
+  }
+}
+]
