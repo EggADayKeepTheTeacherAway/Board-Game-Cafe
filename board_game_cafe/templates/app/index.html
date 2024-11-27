@@ -16,10 +16,8 @@
                 <span class="category">In Stock: {{ book.stock }}</span>
                 <form method="POST" action="{% url 'board_game_cafe:index' %}">
                     {% csrf_token %}
-                    <input type="hidden" name="boardgame_sort_mode" value="none">
-                    <input type="hidden" name="boardgame_filter" value="none">
-                    <input type="hidden" name="table_sort_mode" value="none">
-                    <input type="hidden" name="table_filter" value="none">
+                    <input type="hidden" name="item_type" value="BoardGame">
+                    <input type="hidden" name="item_id" value="{{ book.id }}">
                     <button type="submit" class="button">book</button>
                 </form>
 
@@ -28,19 +26,21 @@
 
         <div class="controls">
             <label for="sort">Sort by:</label>
-            <select id="sort" onchange="">
+            <select id="sort" name="boardgame_sort_mode">
                 <option value="">Select</option>
                 <option value="A-Z">Name (A-Z)</option>
                 <option value="Popularity">Popularity</option>
             </select>
 
             <label for="category">Category:</label>
-            <select id="category" onchange="">
+            <select id="category" name="boardgame_filter">
                 <option value="">Select</option>
                 {% for category in list_of_category %}
                     <option value="{{ category }}">{{ category }}</option>
                 {% endfor %}
             </select>
+
+            <button class="sort-btn">Enter</button>
 
         </div>
     </fieldset>
@@ -54,8 +54,13 @@
             <div class="content">
                 <span class="name">Table {{ table.table_id }}</span>
                 <span class="capacity">Capacity: {{ table.capacity }}</span>
-                <span class="category">Base Fee: {{ table.fee}}  Baht / day</span>
-                <a href="{% url 'board_game_cafe:post_view' %}?action=book" class="button">book</a>
+                <span class="category">Base Fee: {{ table.fee }}  Baht / day</span>
+                <form method="POST" action="{% url 'board_game_cafe:index' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="item_type" value="Table">
+                    <input type="hidden" name="item_id" value="{{ table.id }}">
+                    <button type="submit" class="button">Book</button>
+                </form>
             </div>
         {% endfor %}
 
@@ -73,6 +78,9 @@
                     <option value="{{ all_capa }}">{{ all_capa }}</option>
                 {% endfor %}
             </select>
+
+            <button class="sort-btn">Enter</button>
+
         </div>
     </fieldset>
 </section>
