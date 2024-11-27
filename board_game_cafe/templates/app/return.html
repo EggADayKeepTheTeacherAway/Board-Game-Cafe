@@ -15,7 +15,8 @@
                 <span class="category">Base Fee: {{ return.group.base_fee }} Baht / day</span>
                 <form method="POST" action="{% url 'board_game_cafe:return' %}">
                     {% csrf_token %}
-                    <input type="hidden" name="{{ return.boardgame_id }}" value="{{ return.boardgame_id }}">
+                    <input type="hidden" name="item_id" value="{{ return.boardgame_id }}">
+                    <input type="hidden" name="item_type" value="BoardGame">
                     <button type="submit" class="button">return</button>
                 </form>
             </div>
