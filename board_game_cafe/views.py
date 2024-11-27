@@ -106,7 +106,6 @@ class HomeView(generic.ListView):
             table: [`Table.objects`]
         }
         """
-
         return {
             'boardgame': BoardGame.objects.all(),
             'table': Table.objects.all()
@@ -140,7 +139,8 @@ class RentView(generic.ListView):
             table_filter: str
         }
         """
-        REDIRECT_URL = redirect('board_game_cafe:rent')
+
+        redirect_url = redirect('board_game_cafe:rent')
         what_do = request.POST['what_do']
         
         def rent():
@@ -171,7 +171,8 @@ class RentView(generic.ListView):
             
             messages.info("Your rental order has been created.")
 
-            return REDIRECT_URL
+            return redirect_url
+
 
         def sort():
             boardgame_sort_mode = request.POST.get('boardgame_sort_mode')
@@ -255,10 +256,12 @@ class ReturnView(generic.ListView):
             table: [`Table.objects`]
         }
         """
+
         boardgame_rental = Rental.objects.filter(customer=self.user, item_type="BoardGame",
                                                status='rented')
         table_rental = Rental.objects.filter(customer=self.user, item_type="Table",
                                                status='rented')
+        
         return {
             'boardgame': [boardgame.get_item() for boardgame in boardgame_rental],
             'table': [table.get_item() for table in table_rental],
@@ -292,14 +295,14 @@ class StatView(generic.ListView):
             .order_by('-rental_count')
             .values_list('item_id', flat=True)
                         )
-        
+
         peak_hour = (
             Rental.objects.filter(item_type="Table")
             .annotate(hour=ExtractHour('rent_date'))
             .values('hour')
             .annotate(table_rental=Count('hour'))
             .order_by('-table_rental')
-            .values_list('hour', flat=True)
+            .values_list('hour', flat=True).first()
         )
         week_day = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
         peak_day = (
@@ -309,18 +312,25 @@ class StatView(generic.ListView):
             .annotate(table_rental=Count('day'))
             .order_by('-table_rental')
             .values_list('day', flat=True)  # Get only the day
-        )
+        ).first()
+
+        if peak_day:
+            peak_day_output = week_day[peak_day]
+        else:
+            peak_day_output = None
 
         try:
-            output = {
-                "popular_boardgame": BoardGame.objects.get(boardgame_id=popular_boardgame[0]),
-                "top_boardgame": BoardGame.objects.filter(boardgame_id__in=popular_boardgame[:5]),
-                "peak_hour": peak_hour[0],
-                "peak_day": week_day[peak_day[0]],
-            }
+            popular =  BoardGame.objects.get(boardgame_id=popular_boardgame[0])
+        except BoardGame.DoesNotExist:
+            popular = None
 
-        except (IndexError, BoardGame.DoesNotExist):
-            return None
+        output = {
+            "popular_boardgame":popular,
+            "top_boardgame": BoardGame.objects.filter(boardgame_id__in=popular_boardgame[:5]),
+            "peak_hour": peak_hour,
+            "peak_day": peak_day_output,
+        }
+
 
         return output
 
@@ -348,7 +358,6 @@ class ProfileView(generic.ListView):
             total_fee: fee
         }
         """
-
         return {
             'id': self.user.customer_id,
             'username': self.user.customer_name,
