@@ -71,6 +71,45 @@ class HomeView(generic.ListView):
     template_name = "app/index.html"
     context_object_name = "data"
 
+    def post(self, request, *args, **kwargs):
+        """
+        POST DATA SCHEMA:
+        {
+            boardgame_sort_mode: str['A-Z' || 'Popularity']
+            boardgame_filter: str
+            table_sortt_mode: str
+            table_filter: str
+        }
+        """
+        boardgame_sort_mode = request.POST.get('boardgame_sort_mode')
+        category = request.POST.get('boardgame_filter')
+        table_sort_mode = request.POST.get('table_sort_mode')
+        capacity = request.POST.get('table_filter')
+
+        def get_sorted_boardgame(sort_mode, filter):
+            boardgame_obj = BoardGame.objects.all()
+            if filter:
+                boardgame_category = BoardGameCategory.objects.get(category_name=filter)
+                boardgame_obj = boardgame_obj.filter(category=boardgame_category)
+            if sort_mode:
+                boardgame_obj = boardgame_obj.order_by(sort_mode)
+            return boardgame_obj
+        
+        def get_sorted_table(sort_mode, filter):
+            table_obj = Table.objects.all()
+            if filter:
+                table_obj = table_obj.filter(capacity=filter)
+            if sort_mode:
+                table_obj = table_obj.order_by(sort_mode)
+            return table_obj
+        
+
+        
+        return render(request, 'app/index.html', 
+                    {'boardgame': get_sorted_boardgame(boardgame_sort_mode, category),
+                     'table': get_sorted_table(table_sort_mode, capacity)})
+            
+
     def get_queryset(self):
         """
         Return dict consists of 2 datas: `boardgame`, and `table`.
