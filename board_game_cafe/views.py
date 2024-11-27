@@ -88,17 +88,35 @@ class RentView(generic.ListView):
     context_object_name = 'item'
 
     def post(self, request, *args, **kwargs):
+        REDIRECT_URL = redirect('board_game_cafe:rent')
         item_type = request.POST['item_type']
         item_id = request.POST['item_id']
         user = Customer.object.get(customer_id=request.session['customer_id'])
         due_date = request.POST['due_date']
 
-        if (due_date - timezone.now()).days > 9:
-            messages.warning("You can rent boardgame 9 days at a time.")
-            return redirect('board_game_cafe:rent')
+        def table_handler():
+            if (due_date - timezone.now()).hour > 6:
+                messages.warning("You can rent table 6 hours at a time.")
+                return REDIRECT_URL
+            
+            if Rental.objects.filter(customer=user,
+                                     item_type="table").count() >= 1:
+                messages.warning("You can rent 1 table at a time.")
+                return REDIRECT_URL
 
-        if item_type == 'BoardGame':
+        def boardgame_handler():
+            if (due_date - timezone.now()).days > 9:
+                messages.warning("You can rent boardgame 9 days at a time.")
+                return REDIRECT_URL
+
             BoardGame.objects.get(boardgame_id=item_id).rent_boardgame()
+
+        handler = {"Table": table_handler,
+                   "BoardGame": boardgame_handler}
+        
+        response = handler.get(item_type)()
+        if response is not None:
+            return response
 
         Rental.objects.create(customer=user,
                                 item_type=item_type,
