@@ -121,15 +121,12 @@ class RentView(generic.ListView):
         due_date_str = request.POST.get('due_date')  # Due date as string
         user = Customer.objects.get(customer_id=request.session['customer_id'])
 
-        # Convert due_date_str to datetime object
         try:
             due_date = make_aware(datetime.strptime(due_date_str, "%Y-%m-%d"))
         except ValueError:
             messages.error(request, "Invalid due date format. Please use YYYY-MM-DD.")
             return redirect_url
 
-        # Debugging: Log the converted due_date
-        print(f"Converted due_date: {due_date}")
 
         def table_handler():
             if (due_date - now()).total_seconds() > 6 * 3600:  # 6 hours in seconds
