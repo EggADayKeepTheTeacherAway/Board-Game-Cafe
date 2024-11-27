@@ -7,11 +7,14 @@
             Board Game
         </legend>
 
-        <div class="content">
-            <span class="name">Board Game Name 1</span>
-            <span class="aval">available</span>
-            <a href="{% url 'board_game_cafe:post_view' %}?action=book" class="button">book</a>
-        </div>
+        {% for book_data in data.boardgame %}
+            <div class="content">
+                <span class="name">{{ boardgame_name }}</span>
+                <span class="category">{{ category }}</span>
+                <span class="stock">{{ stock }}</span>
+                <a href="{% url 'board_game_cafe:post_view' %}?action=book" class="button">book</a>
+            </div>
+        {% endfor %}
 
         <div class="controls">
             <label for="sort">Sort by:</label>
