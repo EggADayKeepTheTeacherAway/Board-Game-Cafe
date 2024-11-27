@@ -7,7 +7,6 @@ from django.db.models import F, Count
 from django.db.models.functions import ExtractWeekDay, ExtractHour
 from django.views import generic
 from django.utils import timezone
-from .forms import RegisterForm, LoginForm
 from .models import (Rental, Table, BoardGame,
                      Customer, BoardGameCategory,
                      BoardGameGroup,
@@ -241,12 +240,18 @@ class StatView(generic.ListView):
             .values_list('day', flat=True)  # Get only the day
         )
 
-        return {
-            "popular_boardgame": BoardGame.objects.get(boardgame_id=popular_boardgame[0]),
-            "top_boardgame": BoardGame.objects.filter(boardgame_id__in=popular_boardgame[:5]),
-            "peak_hour": peak_hour[0],
-            "peak_day": week_day[peak_day[0]],
-        }
+        try:
+            output = {
+                "popular_boardgame": BoardGame.objects.get(boardgame_id=popular_boardgame[0]),
+                "top_boardgame": BoardGame.objects.filter(boardgame_id__in=popular_boardgame[:5]),
+                "peak_hour": peak_hour[0],
+                "peak_day": week_day[peak_day[0]],
+            }
+
+        except (IndexError, BoardGame.DoesNotExist):
+            return None
+
+        return output
 
 
 class ProfileView(generic.ListView):
