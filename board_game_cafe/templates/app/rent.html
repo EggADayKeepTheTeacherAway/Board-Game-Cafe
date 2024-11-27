@@ -13,6 +13,7 @@
                 <span class="category">Genre: {{ book.category.category_name }}</span>
                 <span class="category">Number of Player: {{ book.group.num_player }}</span>
                 <span class="category">Base Fee: {{ book.group.base_fee }} Baht / day</span>
+                <span class="category">In Stock: {{ book.stock }}</span>
                 <a href="#" onclick="handleRent('{{ book.boardgame_name }}', 'BoardGame', {{ book.boardgame_id }}); return false;" class="button">
                     rent
                 </a>
@@ -29,10 +30,15 @@
             <div class="content">
                 <span class="name">Table {{ table.table_id }}</span>
                 <span class="capacity">Capacity: {{ table.capacity }}</span>
-                <span class="category">Base Fee: {{ table.fee }} Baht / day</span>
-                <a href="#" onclick="handleRent('Table {{ table.table_id }}', 'Table', {{ table.table_id }}); return false;" class="button">
-                    rent
-                </a>
+                <span class="category">Base Fee: {{ table.fee }} Baht</span>
+                <form method="POST" action="{% url 'board_game_cafe:rent' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="item_type" value="Table">
+                    <input type="hidden" name="item_id" value="{{ table.table_id }}">
+                    <input type="hidden" name="what_do" value="rent">
+                    <input type="hidden" name="due_date" value="today">
+                    <button type="submit" class="button">rent</button>
+                </form>
             </div>
         {% endfor %}
     </fieldset>

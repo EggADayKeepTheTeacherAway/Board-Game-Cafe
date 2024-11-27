@@ -13,6 +13,7 @@
                 <span class="category">Genre: {{ book.category.category_name }}</span>
                 <span class="category">Number of Player: {{ book.group.num_player }}</span>
                 <span class="category">Base Fee: {{ book.group.base_fee }} Baht / day</span>
+                <span class="category">In Stock: {{ book.stock }}</span>
                 <form method="POST" action="{% url 'board_game_cafe:index' %}">
                     {% csrf_token %}
                     <input type="hidden" name="boardgame_sort_mode" value="none">

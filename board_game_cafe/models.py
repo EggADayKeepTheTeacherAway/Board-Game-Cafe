@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils import timezone
+from math import ceil
 
 
 class Customer(models.Model):
@@ -69,8 +70,8 @@ class Rental(models.Model):
     @property
     def duration(self) -> int:
         if self.item_type == 'Table':
-            return (timezone.now() - self.rent_date).hour
-        return (timezone.now() - self.rent_date).days
+            return ceil((timezone.now() - self.rent_date).total_seconds()/3600)
+        return ceil((timezone.now() - self.rent_date).total_seconds()/(3600*24))
 
     @classmethod
     def can_rent(cls, user, item_type):
@@ -117,10 +118,11 @@ class Rental(models.Model):
         return handle_item_type[self.item_type](self.item_id)
     
     def compute_fee(self):
-        self.fee = self.get_item().compute_fee()
+        self.fee = self.get_item().compute_fee(self.duration)
         self.status = 'returned'
         self.return_date = timezone.now()
         self.save()
+        return self.fee
 
     class Meta:
         app_label = 'board_game_cafe'

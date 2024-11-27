@@ -306,13 +306,21 @@ class ReturnView(generic.ListView):
         """
         POST DATA SCHEMA:
         {
-            rental_id: str|int
+            item_id: str|int
+            item_type: str
         }
         """
 
         post_data = normalize_data(request.POST)
 
-        rental = Rental.objects.get(rental_id=post_data['rental_id'])
+        user = Customer.objects.get(customer_id=request.session['customer_id'])
+        rental = Rental.objects.get(
+            item_type=post_data['item_type'],
+            item_id=post_data['item_id'],
+            customer=user,
+            status='rented'
+        )
+
         item_type = rental.item_type
         item_id = rental.item_id
         rental_fee = rental.compute_fee()
@@ -320,11 +328,17 @@ class ReturnView(generic.ListView):
         if rental.item_type == 'BoardGame':
             item.return_boardgame()
         Booking.update_queue(item_type=item_type, item_id=item_id)
+        rental.status = 'returned'
+        rental.fee = rental_fee
+        rental.return_date = timezone.now()
+        rental.save()
+        for rental in Rental.objects.all():
+            print(f"{rental.item_type: <10} {rental.customer.customer_name: <10} {rental.rent_date: <10} {rental.due_date: <10}")
         messages.info(request, f"There is {rental_fee} Baht fee for your rental.")
-        return render(request, self.template_name, self.get_queryset())
+        return render(request, self.template_name, self.get_queryset(user=user))
         
 
-    def get_queryset(self):
+    def get_queryset(self, *args, **kwargs):
         """
         Return dict consists of 2 datas: `boardgame`, and `table`.
         
@@ -335,6 +349,9 @@ class ReturnView(generic.ListView):
             table: [`Table.objects`]
         }
         """
+        user = kwargs.get('user')
+        if user:
+            self.user = user
 
         boardgame_rental = Rental.objects.filter(customer=self.user, item_type="BoardGame",
                                                status='rented')
