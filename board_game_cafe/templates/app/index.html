@@ -17,7 +17,7 @@
                 <form method="POST" action="{% url 'board_game_cafe:index' %}">
                     {% csrf_token %}
                     <input type="hidden" name="item_type" value="BoardGame">
-                    <input type="hidden" name="item_id" value="{{ book.booking_id }}">
+                    <input type="hidden" name="item_id" value="{{ book.boardgame_id }}">
                     <button type="submit" class="button">book</button>
                 </form>
 
