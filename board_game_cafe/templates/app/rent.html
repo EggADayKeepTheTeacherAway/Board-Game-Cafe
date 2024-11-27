@@ -13,6 +13,7 @@
                 <span class="category">Genre: {{ book.category.category_name }}</span>
                 <span class="category">Number of Player: {{ book.group.num_player }}</span>
                 <span class="category">Base Fee: {{ book.group.base_fee }} Baht / day</span>
+                <span class="category">In Stock: {{ book.stock }}</span>
                 <a href="#" onclick="handleRent('{{ book.boardgame_name }}', 'BoardGame', {{ book.boardgame_id }}); return false;" class="button">
                     rent
                 </a>
