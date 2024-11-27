@@ -1,0 +1,29 @@
+[
+{
+  "model": "board_game_cafe.boardgamegroup",
+  "pk": 1,
+  "fields": {
+    "group_name": "small",
+    "base_fee": 5,
+    "num_player": "1-4 people"
+  }
+},
+{
+  "model": "board_game_cafe.boardgamegroup",
+  "pk": 2,
+  "fields": {
+    "group_name": "medium",
+    "base_fee": 10,
+    "num_player": "3-6 people"
+  }
+},
+{
+  "model": "board_game_cafe.boardgamegroup",
+  "pk": 3,
+  "fields": {
+    "group_name": "large",
+    "base_fee": 15,
+    "num_player": "6+ people"
+  }
+}
+]

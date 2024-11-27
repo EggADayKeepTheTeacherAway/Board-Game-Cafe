@@ -1,29 +1,5 @@
 [
     {
-      "model": "board_game_cafe.boardgamegroup",
-      "pk": 1,
-      "fields": {
-        "group_name": "small",
-        "base_fee": 5
-      }
-    },
-    {
-      "model": "board_game_cafe.boardgamegroup",
-      "pk": 2,
-      "fields": {
-        "group_name": "medium",
-        "base_fee": 10
-      }
-    },
-    {
-      "model": "board_game_cafe.boardgamegroup",
-      "pk": 3,
-      "fields": {
-        "group_name": "large",
-        "base_fee": 15
-      }
-    },
-    {
       "model": "board_game_cafe.boardgamecategory",
       "pk": 1,
       "fields": {

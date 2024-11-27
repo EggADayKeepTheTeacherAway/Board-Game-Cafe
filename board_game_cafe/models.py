@@ -86,6 +86,7 @@ class Table(models.Model):
 class BoardGameGroup(models.Model):
     group_name = models.CharField(max_length=30, default="small")
     base_fee = models.IntegerField(default=5)
+    num_player = models.CharField(max_length=30, default="1-4 people")
 
 class BoardGameCategory(models.Model):
     category_id = models.AutoField(primary_key=True, unique=True)
