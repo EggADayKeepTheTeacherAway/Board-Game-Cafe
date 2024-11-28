@@ -106,6 +106,14 @@ fieldset {
     border: 1px solid #DBDBDB;
 }
 
+#table {
+    grid-template-columns: repeat(4, 25%);
+}
+
+#return-board {
+    grid-template-columns: repeat(5, 20%);
+}
+
 .name {
     margin-left: 16px;
     align-self: center;
@@ -116,6 +124,7 @@ fieldset {
     align-self: center;
 
 }
+
 
 /* functionality */
 .button {
