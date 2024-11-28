@@ -115,13 +115,13 @@ class HomeView(generic.ListView):
             Booking.create_or_delete(item_type, item_id, user)
 
         
-        return render(request, 'app/index.html', 
-                    {'boardgame': BoardGame.get_sorted_data(boardgame_sort_mode, category),
-                     'table': Table.get_sorted_data(table_sort_mode, capacity),
-                     'my_table_book': Booking.objects.filter(customer=user, item_type='Table'),
-                     'my_bg_book': Booking.objects.filter(customer=user, item_type='BoardGame'),
-                     })
-            
+        return render(request, 'app/index.html', context={'data':
+                                                          {'boardgame': BoardGame.get_sorted_data(boardgame_sort_mode, category),
+                                                            'table': Table.get_sorted_data(table_sort_mode, capacity),
+                                                            'my_table_book': Booking.objects.filter(customer=user, item_type='Table'),
+                                                            'my_bg_book': Booking.objects.filter(customer=user, item_type='BoardGame'),
+                                                            }})
+        
 
     def get_queryset(self):
         """
