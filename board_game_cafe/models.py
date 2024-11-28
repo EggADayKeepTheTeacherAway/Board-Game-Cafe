@@ -138,7 +138,7 @@ class Table(models.Model):
     max_rent = 1
 
     def is_available(self):
-        return self.table_id not in Rental.objects.filter(
+        return str(self.table_id) not in Rental.objects.filter(
             item_type='Table', status="rented").values_list('item_id', flat=True)
     
     def compute_fee(self, hours):
