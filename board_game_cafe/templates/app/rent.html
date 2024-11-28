@@ -15,7 +15,7 @@
                 <span class="category">Base Fee: {{ book.group.base_fee }} Baht / day</span>
                 <span class="category">In Stock: {{ book.stock }}</span>
                 <a href="#" onclick="handleRent('{{ book.boardgame_name }}', 'BoardGame', {{ book.boardgame_id }}); return false;" class="button">
-                    rent
+                    Rent
                 </a>
             </div>
         {% endfor %}
@@ -37,7 +37,7 @@
                     <input type="hidden" name="item_id" value="{{ table.table_id }}">
                     <input type="hidden" name="what_do" value="rent">
                     <input type="hidden" name="due_date" value="today">
-                    <button type="submit" class="button">rent</button>
+                    <button type="submit" class="button">Rent</button>
                 </form>
             </div>
         {% endfor %}

@@ -14,13 +14,18 @@
                 <span class="category">Number of Player: {{ book.group.num_player }}</span>
                 <span class="category">Base Fee: {{ book.group.base_fee }} Baht / day</span>
                 <span class="category">In Stock: {{ book.stock }}</span>
-                <form method="POST" action="{% url 'board_game_cafe:index' %}">
+
+                <form method="POST" action="{% url 'board_game_cafe:index' %}" class="booking-form">
                     {% csrf_token %}
                     <input type="hidden" name="item_type" value="BoardGame">
                     <input type="hidden" name="item_id" value="{{ book.boardgame_id }}">
-                    <button type="submit" class="button">book</button>
+                    <button type="submit"
+                            class="button book-button"
+                            data-item-id="{{ book.boardgame_id }}"
+                            onclick="toggleBookingState(event, this)">
+                        Book
+                    </button>
                 </form>
-
             </div>
         {% endfor %}
 
@@ -41,7 +46,6 @@
             </select>
 
             <button class="sort-btn">Enter</button>
-
         </div>
     </fieldset>
 
@@ -54,25 +58,30 @@
             <div class="content" id="table">
                 <span class="name">Table {{ table.table_id }}</span>
                 <span class="capacity">Capacity: {{ table.capacity }}</span>
-                <span class="category">Base Fee: {{ table.fee }}  Baht / day</span>
-                <form method="POST" action="{% url 'board_game_cafe:index' %}">
+                <span class="category">Base Fee: {{ table.fee }} Baht / day</span>
+                <form method="POST" action="{% url 'board_game_cafe:index' %}" class="booking-form">
                     {% csrf_token %}
                     <input type="hidden" name="item_type" value="Table">
                     <input type="hidden" name="item_id" value="{{ table.table_id }}">
-                    <button type="submit" class="button">Book</button>
+                    <button type="submit"
+                            class="button book-button"
+                            data-item-id="{{ table.table_id }}"
+                            onclick="toggleBookingState(event, this)">
+                        Book
+                    </button>
                 </form>
             </div>
         {% endfor %}
 
         <div class="controls">
             <label for="table-sort">Sort by:</label>
-            <select id="table-sort" onchange="">
+            <select id="table-sort">
                 <option value="">Select</option>
                 <option value="capacity">Capacity</option>
             </select>
 
             <label for="capacity">Capacity:</label>
-            <select id="capacity" onchange="">
+            <select id="capacity">
                 <option value="">Select</option>
                 {% for all_capa in list_of_capacity %}
                     <option value="{{ all_capa }}">{{ all_capa }}</option>
@@ -80,8 +89,26 @@
             </select>
 
             <button class="sort-btn">Enter</button>
-
         </div>
     </fieldset>
 </section>
+
+<script>
+    function toggleBookingState(event, button) {
+        // Prevent form submission
+        event.preventDefault();
+
+        // Check the current state of the button and toggle
+        if (button.innerText.trim() === "Book") {
+            button.innerText = "Cancel";
+            button.style.backgroundColor = "red";
+        } else {
+            button.innerText = "Book";
+            button.style.backgroundColor = ""; // Reset to default
+        }
+
+        // Optionally, submit the form programmatically here if needed:
+        // button.closest("form").submit();
+    }
+</script>
 {% endblock %}

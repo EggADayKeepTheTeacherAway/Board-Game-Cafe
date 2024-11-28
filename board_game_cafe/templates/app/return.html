@@ -17,7 +17,7 @@
                     {% csrf_token %}
                     <input type="hidden" name="item_id" value="{{ return.boardgame_id }}">
                     <input type="hidden" name="item_type" value="BoardGame">
-                    <button type="submit" class="button">return</button>
+                    <button type="submit" class="button">Return</button>
                 </form>
             </div>
         {% endfor %}
@@ -38,7 +38,7 @@
                     {% csrf_token %}
                     <input type="hidden" name="item_id" value="{{ table.table_id }}">
                     <input type="hidden" name="item_type" value="Table">
-                    <button type="submit" class="button">return</button>
+                    <button type="submit" class="button">Return</button>
                 </form>
             </div>
         {% endfor %}
