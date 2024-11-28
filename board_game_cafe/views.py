@@ -204,47 +204,49 @@ class RentView(generic.ListView):
             item_type = post_data['item_type']
             item_id = post_data['item_id']
             user = Customer.objects.get(customer_id=request.session['customer_id'])
-            try:
-                due_date_str = post_data['due_date']
-                due_date = make_aware(datetime.strptime(due_date_str, "%Y-%m-%d"))
-            except ValueError:
-                messages.error(request, "Invalid due date format. Please use YYYY-MM-DD.")
-                return redirect('board_game_cafe:rent')
             
             Booking.delete_if_exists(item_type, item_id, self.user)
 
             if item_type == 'Table':
+                
+                if Rental.objects.filter(item_type='Table', status='rented', customer=user).count() >= 1:
+                    messages.warning(request, "You can rent 1 table at a time.")
+                    return redirect_url
+
                 Rental.objects.create(customer=user,
                                     item_type=item_type,
                                     item_id=item_id,
                                     due_date=timezone.now()+timezone.timedelta(hours=23, minutes=58, seconds=59)
                                     )
 
-            day_or_hour = 'hours' if item_type == 'Table' else 'days'
-
-            item = {'Table': Table, 'BoardGame': BoardGame}.get(item_type)
-
-
-            if not Rental.is_good_due_date_boardgame(due_date, item_type):
-                messages.warning(request, f"You can rent {item_type.lower()} {item.max_rent_time} {day_or_hour} at a time.")
-                return redirect_url
-                
-            if not Rental.can_rent(user, item_type):
-                messages.warning(request, f"You can rent {item.max_rent} {item_type.lower()} at a time.")
-                return redirect_url
-            
             if item_type == 'BoardGame':
+                try:
+                    due_date_str = post_data['due_date']
+                    due_date = make_aware(datetime.strptime(due_date_str, "%Y-%m-%d"))
+                except ValueError:
+                    messages.error(request, "Invalid due date format. Please use YYYY-MM-DD.")
+                    return redirect('board_game_cafe:rent')
+
+                if not Rental.is_good_due_date_boardgame(due_date, item_type):
+                    messages.warning(request, f"You can rent {item_type.lower()} {Rental.max_rent_time} days at a time.")
+                    return redirect_url
+                    
+                if not Rental.can_rent(user, item_type):
+                    messages.warning(request, f"You can rent {Rental.max_rent} {item_type.lower()} at a time.")
+                    return redirect_url
+                
+                
                 try:
                     BoardGame.objects.get(boardgame_id=item_id).rent_boardgame()
                 except ValueError:
                     messages.warning(request, "This BoardGame has ran out of stock at the moment.")
                     return redirect_url
 
-            Rental.objects.create(customer=user,
-                                    item_type=item_type,
-                                    item_id=item_id,
-                                    due_date=due_date
-                                    )
+                Rental.objects.create(customer=user,
+                                        item_type=item_type,
+                                        item_id=item_id,
+                                        due_date=due_date
+                                        )
             
             messages.info(request, "Your rental order has been created.")
 

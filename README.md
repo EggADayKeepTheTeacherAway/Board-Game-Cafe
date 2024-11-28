@@ -1,1 +1,6 @@
 # Board-Game-Cafe
+
+HENLO
+ICHI IS FROM SPACE
+ICHI EATS KFC
+    
