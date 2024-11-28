@@ -335,8 +335,7 @@ class ReturnView(generic.ListView):
         for rental in Rental.objects.all():
             print(f"{rental.item_type: <10} {rental.customer.customer_name: <10} {rental.rent_date: <10} {rental.due_date: <10}")
         messages.info(request, f"There is {rental_fee} Baht fee for your rental.")
-        return render(request, self.template_name, self.get_queryset(user=user))
-        
+        return redirect('board_game_cafe:return')
 
     def get_queryset(self, *args, **kwargs):
         """
