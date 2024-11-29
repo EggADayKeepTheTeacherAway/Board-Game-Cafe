@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils import timezone
+from django.db.models import F
 from math import ceil
 
 
@@ -40,6 +41,10 @@ class Booking(models.Model):
                                 customer=user)
         if booking_for_this_obj.exists():
             booking_for_this_obj.get().delete()
+
+    @classmethod
+    def get_next_in_queue(cls, item_type, item_id):
+
 
     @classmethod
     def create_or_delete(cls, item_type, item_id, user):
@@ -200,9 +205,12 @@ class BoardGame(models.Model):
             boardgame_category = BoardGameCategory.objects.get(category_name=category)
             boardgame_obj = boardgame_obj.filter(category=boardgame_category)
         if boardgame_sort_mode:
-            boardgame_obj = boardgame_obj.order_by(boardgame_sort_mode)
+            if boardgame_sort_mode == 'A-Z':
+                return boardgame_obj.order_by(boardgame_sort_mode)
+            if boardgame_sort_mode == 'Popularity':
+                return boardgame_obj.annotate(count=Rental.objects.filter(item_type="BoardGame", item_id=F('boardgame_id')).count()).order_by('count')
         return boardgame_obj
-    
+
     @classmethod
     def is_good_due_date(cls, due_date):
         return (due_date - timezone.now()).total_seconds()/(3600*24) < cls.max_rent_time
