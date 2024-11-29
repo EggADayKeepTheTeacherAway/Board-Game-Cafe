@@ -153,8 +153,8 @@ class HomeView(generic.ListView):
             'table': Table.get_sorted_data(table_sort_mode=table_sort_mode, capacity=capacity),
             'list_of_capacity': [i for i in range(1, num_max + 1)],
             'list_of_category': category_list,
-            'booked_boardgame': [booking.booking_id for booking in Booking.objects.filter(status='booked', item_type='BoardGame', customer=self.user)],
-            'booked_table': [booking.booking_id for booking in Booking.objects.filter(status='booked', item_type='Table', customer=self.user)],
+            'booked_boardgame': [booking.item_id for booking in Booking.objects.filter(status='booked', item_type='BoardGame', customer=self.user)],
+            'booked_table': [booking.item_id for booking in Booking.objects.filter(status='booked', item_type='Table', customer=self.user)],
             }
 
 
