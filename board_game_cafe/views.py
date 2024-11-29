@@ -62,6 +62,10 @@ def signup(request):
             messages.warning(request, "You already have an account.")
             return redirect('signup')
 
+        if len(contact) != 10:
+            messages.warning(request, "Invalid contact number")
+            return redirect('signup')
+
         user = Customer.objects.create(customer_name=customer_name,
                                        password=password,
                                        contact=contact)
