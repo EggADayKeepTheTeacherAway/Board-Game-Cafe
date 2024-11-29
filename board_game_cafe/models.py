@@ -1,6 +1,6 @@
 from django.db import models
 from django.utils import timezone
-from django.db.models import F
+from django.db.models import F, Q, Count, OuterRef, Subquery
 from math import ceil
 
 
@@ -199,9 +199,17 @@ class BoardGame(models.Model):
             boardgame_obj = boardgame_obj.filter(category=boardgame_category)
         if boardgame_sort_mode:
             if boardgame_sort_mode == 'A-Z':
-                return boardgame_obj.order_by(boardgame_sort_mode)
+                return boardgame_obj.order_by("boardgame_name")
             if boardgame_sort_mode == 'Popularity':
-                return boardgame_obj.annotate(count=Rental.objects.filter(item_type="BoardGame", item_id=F('boardgame_id')).count()).order_by('count')
+                active_rentals = Rental.objects.filter(
+                    item_type="BoardGame",  # Only consider rentals for board games
+                    item_id=OuterRef('boardgame_id')  # Match the item_id in Rental with boardgame_id in BoardGame
+                ).values('item_id')  # Use item_id to count rentals
+
+                # Now, annotate the BoardGame objects with the rental count
+                boardgame_obj = BoardGame.objects.annotate(
+                                    rental_count=Subquery(active_rentals.annotate(count=Count('item_id')).values('count')[:1])  # Count rentals
+                                ).order_by('-rental_count')
         return boardgame_obj
 
     @classmethod

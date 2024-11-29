@@ -120,10 +120,10 @@ class HomeView(generic.ListView):
             Booker.run_booker(item_type=item_type, request=request, item_id=item_id, user=user)
 
         
-        return render(request, "board_game_cafe:index", context={'data': {self.get_queryset(boardgame_sort_mode=boardgame_sort_mode,
+        return render(request, 'app/index.html', context={'data': self.get_queryset(boardgame_sort_mode=boardgame_sort_mode,
                                                                                             category=category,
                                                                                             table_sort_mode=table_sort_mode,
-                                                                                            capacity=capacity)}})
+                                                                                            capacity=capacity)})
 
     def get_queryset(self, boardgame_sort_mode='', category='', table_sort_mode='', capacity='', *args, **kwargs):
         """
@@ -137,7 +137,7 @@ class HomeView(generic.ListView):
         }
         """
         not_available = BoardGame.objects.filter(stock=0).values_list('boardgame_id', flat=True)
-
+        
         return {
             'boardgame': BoardGame.get_sorted_data(boardgame_sort_mode=boardgame_sort_mode, category=category),
             'table': Table.get_sorted_data(table_sort_mode=table_sort_mode, capacity=capacity),
