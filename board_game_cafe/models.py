@@ -45,6 +45,9 @@ class Booking(models.Model):
         if booking_for_this_obj.exists():
             booking_for_this_obj.get().delete()
 
+        if item_type == "BoardGame":
+            BoardGame.objects.get(boardgame_id=item_id).return_boardgame()
+
     @classmethod
     def get_next_in_queue(cls, item_type, item_id):
         return Booking.objects.filter(item_type=item_type, item_id=item_id, status='booked').order_by('booking_id').first()

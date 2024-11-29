@@ -46,7 +46,7 @@ class Booker:
             return
         
         table = Table.objects.get(table_id=item_id)
-        if table.is_available():
+        if table.is_available(user):
             booking.status = 'rentable'
             booking.rentable_date = timezone.now()
             booking.save()

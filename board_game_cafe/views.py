@@ -19,6 +19,7 @@ from .models import (Rental, Table, BoardGame,
 from .rental_manager import Renter
 from .booking_manager import Booker
 
+
 def normalize_data(data):
     post_data = {}
     for key, val in data.items():
@@ -38,7 +39,8 @@ def login(request):
         user = Customer.objects.filter(customer_name=customer_name, password=password)
         if user.exists():
             user = user.get()
-            request.session['customer_id'] = user.customer_id 
+            request.session['customer_id'] = user.customer_id
+            USER = user
             return redirect('board_game_cafe:index')
         messages.error(request,
                        "You entered wrong username or password.")
@@ -92,11 +94,6 @@ class HomeView(generic.ListView):
     template_name = "app/index.html"
     context_object_name = "data"
 
-    def get(self, request, *args, **kwargs):
-        self.user = Customer.objects.get(customer_id=request.session['customer_id'])
-        return super().get(request, *args, **kwargs)
-
-
     def post(self, request, *args, **kwargs):
         """
         POST DATA SCHEMA:
@@ -112,8 +109,7 @@ class HomeView(generic.ListView):
         """
 
         post_data = normalize_data(request.POST)
-
-        user = Customer.objects.get(customer_id=request.session['customer_id'])
+        user = Customer.objects.get(customer_id=self.request.session['customer_id'])
         item_type = post_data.get('item_type')
         item_id = post_data.get('item_id')
         boardgame_sort_mode = post_data.get('boardgame_sort_mode')
@@ -141,6 +137,7 @@ class HomeView(generic.ListView):
             table: [`Table.objects`]
         }
         """
+        user = Customer.objects.get(customer_id=self.request.session['customer_id'])
         not_available = BoardGame.objects.filter(stock=0).values_list('boardgame_id', flat=True)
         num_max = max([table.capacity for table in Table.objects.all()])
         category_list = []
@@ -153,8 +150,8 @@ class HomeView(generic.ListView):
             'table': Table.get_sorted_data(table_sort_mode=table_sort_mode, capacity=capacity),
             'list_of_capacity': [i for i in range(1, num_max + 1)],
             'list_of_category': category_list,
-            'booked_boardgame': [booking.item_id for booking in Booking.objects.filter(status='booked', item_type='BoardGame', customer=self.user)],
-            'booked_table': [booking.item_id for booking in Booking.objects.filter(status='booked', item_type='Table', customer=self.user)],
+            'booked_boardgame': [booking.item_id for booking in Booking.objects.filter(status='booked', item_type='BoardGame', customer=user)],
+            'booked_table': [booking.item_id for booking in Booking.objects.filter(status='booked', item_type='Table', customer=user)],
             }
 
 
@@ -164,15 +161,6 @@ class RentView(generic.ListView):
     template_name = "app/rent.html"
 
     context_object_name = 'item'
-
-    def __init__(self):
-        """Initailize method for Rent feature."""
-        super().__init__()
-        self.user = None
-
-    def get(self, request, *args, **kwargs):
-        self.user = Customer.objects.get(customer_id=request.session['customer_id'])
-        return super().get(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
         """
@@ -192,15 +180,14 @@ class RentView(generic.ListView):
         """
 
         post_data = normalize_data(request.POST)
-
+        user = Customer.objects.get(customer_id=self.request.session['customer_id'])
         redirect_url = redirect('board_game_cafe:rent')
         
         item_type = post_data['item_type']
         item_id = post_data['item_id']
         due_date = post_data['due_date']
-        user = Customer.objects.get(customer_id=request.session['customer_id'])
         
-        Booking.delete_if_exists(item_type, item_id, self.user)
+        Booking.delete_if_exists(item_type, item_id, user)
 
         Renter.run_renter(request=request, item_type=item_type, item_id=item_id, user=user, due_date=due_date)
 
@@ -218,17 +205,18 @@ class RentView(generic.ListView):
             table: [`Table.objects`]
         }
         """
-        renting = set(Rental.objects.filter(customer=self.user,
+        user = Customer.objects.get(customer_id=self.request.session['customer_id'])
+        renting = set(Rental.objects.filter(customer=user,
                                         status="rented", item_type="BoardGame").values_list('item_id', flat=True) or [])
         not_available = set(BoardGame.objects.filter(stock=0).values_list('boardgame_id', flat=True) or [])
-        my_rentable_boardgame = set(Booking.objects.filter(status="rentable", item_type="BoardGame", customer=self.user) or [])
+        my_rentable_boardgame = set(Booking.objects.filter(status="rentable", item_type="BoardGame", customer=user) or [])
         exclude = set(renting).union(set(not_available)) - set(my_rentable_boardgame)
 
         return {
             'boardgame': BoardGame.objects.exclude(boardgame_id__in=exclude),
             'table': [table
                       for table in Table.objects.all()
-                      if table.is_available(user=self.user)] + list(Booking.objects.filter(status='booked', item_type="Table", customer=self.user))
+                      if table.is_available(user=user)] + list(Booking.objects.filter(status='booked', item_type="Table", customer=user))
         }
 
 
@@ -239,7 +227,7 @@ class ReturnView(generic.ListView):
 
     def get(self, request, *args, **kwargs):
         self.user = Customer.objects.get(customer_id=request.session['customer_id'])
-        return super().get(request, *args, **kwargs)
+        return super().get(request=request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
         """
@@ -249,10 +237,9 @@ class ReturnView(generic.ListView):
             item_type: str
         }
         """
-
+        user = Customer.objects.get(customer_id=self.request.session['customer_id'])
         post_data = normalize_data(request.POST)
 
-        user = Customer.objects.get(customer_id=request.session['customer_id'])
         rental = Rental.objects.get(
             item_type=post_data['item_type'],
             item_id=post_data['item_id'],
@@ -287,13 +274,11 @@ class ReturnView(generic.ListView):
             table: [`Table.objects`]
         }
         """
-        user = kwargs.get('user')
-        if user:
-            self.user = user
+        user = Customer.objects.get(customer_id=self.request.session['customer_id'])
 
-        boardgame_rental = Rental.objects.filter(customer=self.user, item_type="BoardGame",
+        boardgame_rental = Rental.objects.filter(customer=user, item_type="BoardGame",
                                                status='rented')
-        table_rental = Rental.objects.filter(customer=self.user, item_type="Table",
+        table_rental = Rental.objects.filter(customer=user, item_type="Table",
                                                status='rented')
         
         return {
@@ -364,7 +349,6 @@ class StatView(generic.ListView):
             "peak_hour": peak_hour,
             "peak_day": peak_day_output,
         }
-
 
         return output
 

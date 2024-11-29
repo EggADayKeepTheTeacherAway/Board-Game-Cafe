@@ -2,7 +2,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib import messages
 from django.utils.timezone import make_aware
 from django.utils import timezone
-from .models import Rental, BoardGame
+from .models import Rental, BoardGame, Booking
 
 import datetime
 
