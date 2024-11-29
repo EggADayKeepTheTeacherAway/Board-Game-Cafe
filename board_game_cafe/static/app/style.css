@@ -109,8 +109,9 @@ fieldset {
 }
 
 .content {
-    display: grid;
-    grid-template-columns: repeat(6, 16%);
+    display: flex;
+    justify-content: space-between;
+    grid-template-columns: repeat(6, 16.66%);
 
 
     background-color: #f1f1f1;
@@ -121,6 +122,18 @@ fieldset {
 
     border-radius: 8px;
     border: 1px solid #DBDBDB;
+}
+
+
+.name, .category {
+    width: 16%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.name:hover, .category:hover {
+  overflow: visible;
 }
 
 #table {
@@ -161,6 +174,7 @@ fieldset {
     text-align: center;
     text-decoration: none;
 
+    margin-right: 2rem;
     height: 2rem;
     width: 5rem;
     justify-self: end;
