@@ -96,6 +96,14 @@ hr {
     margin-top: 40px;
 }
 
+.profile-header{
+    font-size: 30px;
+}
+
+.profile-detail{
+    font-size: 25px;
+}
+
 legend {
     background-color: #FF6600;
     color: white;
