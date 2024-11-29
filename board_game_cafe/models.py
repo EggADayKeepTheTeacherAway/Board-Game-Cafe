@@ -24,15 +24,18 @@ class Booking(models.Model):
     rentable_date = models.DateTimeField(null=True)
     
     @classmethod
-    def update_queue(cls, item_type, item_id):
-        next_booking_in_queue = Booking.objects.filter(item_type=item_type,
-                                  item_id=item_id, status="booked"
-                                  ).order_by('booking_id')
-        if next_booking_in_queue.exists():
-            next_booking = next_booking_in_queue.get()
-            next_booking.status = 'rentable'
-            next_booking_in_queue.rentable_date = timezone.now()
-            next_booking.save()
+    def update_queue(cls, item_type, item_id, user, *args, **kwargs):
+        next_booking_in_queue = Booking.get_next_in_queue(item_type, item_id)
+        if next_booking_in_queue:
+            next_booking_in_queue.delete()
+            if item_type == "BoardGame":
+                BoardGame.objects.get(boardgame_id=item_id).stock -= 1
+            Rental.objects.create(customer=user,
+                                    item_type=item_type,
+                                    item_id=item_id,
+                                    due_date={"Table": timezone.now()+timezone.timedelta(hours=6),
+                                            "BoardGame": timezone.now()+timezone.timedelta(days=3)}.get(item_type)
+                                    )
 
     @classmethod
     def delete_if_exists(cls, item_type, item_id, user):

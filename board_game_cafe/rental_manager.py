@@ -14,12 +14,10 @@ class Renter:
             messages.warning(request, "You can rent 1 table at a time.")
             return
         
-        today_midnight = timezone.now().replace(hour=23, minute=59, second=59, microsecond=999999)
-
         Rental.objects.create(customer=user,
                             item_type="Table",
                             item_id=item_id,
-                            due_date=today_midnight
+                            due_date=timezone.now()+timezone.timedelta(hours=6)
                             )
         
         messages.info(request, "Your rental order has been created.")

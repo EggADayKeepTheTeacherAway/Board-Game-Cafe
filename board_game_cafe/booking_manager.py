@@ -9,7 +9,8 @@ class Booker:
         -Boardgame
             1. If BoardGame is available, booking's status will be `rentable` and boardgame stock deducted.
             2. If BoardGame is not available, booking's status will be `booked` and boardgame stock not deducted.
-            3. If BoardGame was returned while there are Bookings for the boardgame, oldest booking's status will be `rentable`, and boardgame stock deducted.
+            3. If BoardGame was returned while there are Bookings for the boardgame, oldest booking's will be deleted,
+               and new Rental will be created (its due_date will be 3 days after Rental creation), boardgame stock deducted.
 
         -Table
             1. If Table is available, booking will not be created but rental for the table instead.

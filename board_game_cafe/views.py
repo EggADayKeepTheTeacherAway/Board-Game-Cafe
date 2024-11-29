@@ -94,7 +94,7 @@ class HomeView(generic.ListView):
 
     def get(self, request, *args, **kwargs):
         self.user = Customer.objects.get(customer_id=request.session['customer_id'])
-        super().get(request, *args, **kwargs)
+        return super().get(request, *args, **kwargs)
 
 
     def post(self, request, *args, **kwargs):
@@ -266,7 +266,7 @@ class ReturnView(generic.ListView):
         item = rental.get_item()
         if rental.item_type == 'BoardGame':
             item.return_boardgame()
-        Booking.update_queue(item_type=item_type, item_id=item_id)
+        Booking.update_queue(item_type=item_type, item_id=item_id, user=user)
         rental.status = 'returned'
         rental.fee = rental_fee
         rental.return_date = timezone.now()
