@@ -8,7 +8,6 @@ app_name = "board_game_cafe"
 
 urlpatterns = [
     path("", views.HomeView.as_view(), name="index"),
-    path("post", views.HomeView.as_view(), name="post_view"),
     path("rent/", views.RentView.as_view(), name="rent"),
     path("return/", views.ReturnView.as_view(), name="return"),
     path("stat/", views.StatView.as_view(), name="stat"),
