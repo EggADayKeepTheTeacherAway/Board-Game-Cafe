@@ -2,6 +2,53 @@
 
 {% block content %}
 <section class="main-body">
+   <form method="post" action="{% url 'board_game_cafe:index' %}">
+    {% csrf_token %}
+    <fieldset class="sort container" id="sort-container">
+        <legend class="sort-header">
+            Sort and Filter
+        </legend>
+        <div class="controls">
+            <label for="board-sort">Board Game:</label>
+            <div id="board-sort">
+                <label for="sort">Sort by:</label>
+                <select id="sort" name="boardgame_sort_mode">
+                    <option value="">Select</option>
+                    <option value="A-Z">Name (A-Z)</option>
+                    <option value="Popularity">Popularity</option>
+                </select>
+
+                <label for="category">Category:</label>
+                <select id="category" name="boardgame_filter">
+                    <option value="">Select</option>
+                    {% for category in list_of_category %}
+                        <option value="{{ category }}">{{ category }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <label for="table-sort">Table:</label>
+            <div id="table-sort">
+                <label for="table-sortby">Sort by:</label>
+                <select id="table-sortby" name="table_sort_mode">
+                    <option value="">Select</option>
+                    <option value="capacity">Capacity</option>
+                </select>
+
+                <label for="capacity">Capacity:</label>
+                <select id="capacity" name="table_filter">
+                    <option value="">Select</option>
+                    {% for all_capa in list_of_capacity %}
+                        <option value="{{ all_capa }}">{{ all_capa }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit" class="sort-btn">Enter</button>
+        </div>
+    </fieldset>
+</form>
+
+
     <fieldset class="board-game container">
         <legend class="board-game-header">
             Board Game
@@ -29,24 +76,6 @@
             </div>
         {% endfor %}
 
-        <div class="controls">
-            <label for="sort">Sort by:</label>
-            <select id="sort" name="boardgame_sort_mode">
-                <option value="">Select</option>
-                <option value="A-Z">Name (A-Z)</option>
-                <option value="Popularity">Popularity</option>
-            </select>
-
-            <label for="category">Category:</label>
-            <select id="category" name="boardgame_filter">
-                <option value="">Select</option>
-                {% for category in list_of_category %}
-                    <option value="{{ category }}">{{ category }}</option>
-                {% endfor %}
-            </select>
-
-            <button class="sort-btn">Enter</button>
-        </div>
     </fieldset>
 
     <fieldset class="table container">
@@ -72,24 +101,6 @@
                 </form>
             </div>
         {% endfor %}
-
-        <div class="controls">
-            <label for="table-sort">Sort by:</label>
-            <select id="table-sort">
-                <option value="">Select</option>
-                <option value="capacity">Capacity</option>
-            </select>
-
-            <label for="capacity">Capacity:</label>
-            <select id="capacity">
-                <option value="">Select</option>
-                {% for all_capa in list_of_capacity %}
-                    <option value="{{ all_capa }}">{{ all_capa }}</option>
-                {% endfor %}
-            </select>
-
-            <button class="sort-btn">Enter</button>
-        </div>
     </fieldset>
 </section>
 

@@ -62,7 +62,17 @@ hr {
     color: white;
 }
 
+/* sort and filter */
+.controls {
+    display: flex;
+    gap: 5px;
+}
 
+.sort-btn {
+    color: white;
+    background-color: black;
+    border: none;
+}
 /* body start here */
 
 .main-body {
@@ -70,7 +80,7 @@ hr {
 }
 
 .container {
-    margin-top: 80px;
+    margin-top: 40px;
 }
 
 legend {
@@ -91,9 +101,17 @@ fieldset {
     border: 2px solid #953C00;
 }
 
+#sort-container {
+    min-height: 0px;
+    height: fit-content;
+    width: fit-content;
+
+}
+
 .content {
-    display: grid;
-    grid-template-columns: repeat(6, 16%);
+    display: flex;
+    justify-content: space-between;
+    grid-template-columns: repeat(6, 16.66%);
 
 
     background-color: #f1f1f1;
@@ -104,6 +122,18 @@ fieldset {
 
     border-radius: 8px;
     border: 1px solid #DBDBDB;
+}
+
+
+.name, .category {
+    width: 16%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.name:hover, .category:hover {
+  overflow: visible;
 }
 
 #table {
@@ -144,6 +174,7 @@ fieldset {
     text-align: center;
     text-decoration: none;
 
+    margin-right: 2rem;
     height: 2rem;
     width: 5rem;
     justify-self: end;
