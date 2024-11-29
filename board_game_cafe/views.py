@@ -115,12 +115,12 @@ class HomeView(generic.ListView):
             Booking.create_or_delete(item_type, item_id, user)
 
         
-        return render(request, 'app/index.html', context={'data':
-                                                          {'boardgame': BoardGame.get_sorted_data(boardgame_sort_mode, category).filter(),
-                                                            'table': Table.get_sorted_data(table_sort_mode, capacity),
-                                                            }})
+        return render(request, "board_game_cafe:index", context={'data': {self.get_queryset(boardgame_sort_mode=boardgame_sort_mode,
+                                                                                            category=category,
+                                                                                            table_sort_mode=table_sort_mode,
+                                                                                            capacity=capacity)}})
 
-    def get_queryset(self):
+    def get_queryset(self, boardgame_sort_mode='', category='', table_sort_mode='', capacity='', *args, **kwargs):
         """
         Return dict consists of 2 datas: `boardgame`, and `table`.
         
@@ -131,9 +131,11 @@ class HomeView(generic.ListView):
             table: [`Table.objects`]
         }
         """
+        not_available = BoardGame.objects.filter(stock=0).values_list('boardgame_id', flat=True)
+
         return {
-            'boardgame': BoardGame.objects.all(),
-            'table': Table.objects.all()
+            'boardgame': BoardGame.get_sorted_data(boardgame_sort_mode=boardgame_sort_mode, category=category),
+            'table': Table.get_sorted_data(table_sort_mode=table_sort_mode, capacity=capacity),
             }
 
     def get_context_data(self, **kwargs):
