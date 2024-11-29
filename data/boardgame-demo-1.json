@@ -6,7 +6,7 @@
       "boardgame_name": "Sheriff of Nottingham",
       "group": 1,
       "category": 1,
-      "stock": 5
+      "stock": 2
     }
   },
   {
@@ -16,7 +16,7 @@
       "boardgame_name": "Catan",
       "group": 2,
       "category": 2,
-      "stock": 5
+      "stock": 7
     }
   },
   {
@@ -26,7 +26,7 @@
       "boardgame_name": "Splendor",
       "group": 1,
       "category": 2,
-      "stock": 5
+      "stock": 4
     }
   },
   {
@@ -36,7 +36,7 @@
       "boardgame_name": "Werewolf",
       "group": 2,
       "category": 1,
-      "stock": 5
+      "stock": 3
     }
   },
   {
@@ -46,7 +46,7 @@
       "boardgame_name": "Pandemic",
       "group": 2,
       "category": 3,
-      "stock": 5
+      "stock": 7
     }
   },
   {

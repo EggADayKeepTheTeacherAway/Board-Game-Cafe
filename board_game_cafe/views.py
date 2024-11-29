@@ -1,7 +1,6 @@
 """Views class for element that show to the user."""
 
-from datetime import datetime
-from django.utils.timezone import make_aware
+from datetime import datetime, timedelta
 from django.shortcuts import get_object_or_404, redirect, render
 from django.http import HttpResponse
 from django.contrib import messages
@@ -17,6 +16,7 @@ from .models import (Rental, Table, BoardGame,
                      Customer, BoardGameCategory,
                      BoardGameGroup, Booking
                      )
+from .rental_manager import Renter
 
 def normalize_data(data):
     post_data = {}
@@ -117,17 +117,16 @@ class HomeView(generic.ListView):
 
         if item_type and item_id:
             Booking.create_or_delete(item_type, item_id, user)
+            
+            messages.info(request, f"Booking for {item_type} was created successfully.")
 
         
-        return render(request, 'app/index.html', context={'data':
-                                                          {'boardgame': BoardGame.get_sorted_data(boardgame_sort_mode, category),
-                                                            'table': Table.get_sorted_data(table_sort_mode, capacity),
-                                                            'my_table_book': Booking.objects.filter(customer=user, item_type='Table'),
-                                                            'my_bg_book': Booking.objects.filter(customer=user, item_type='BoardGame'),
-                                                            }})
-        
+        return render(request, "board_game_cafe:index", context={'data': {self.get_queryset(boardgame_sort_mode=boardgame_sort_mode,
+                                                                                            category=category,
+                                                                                            table_sort_mode=table_sort_mode,
+                                                                                            capacity=capacity)}})
 
-    def get_queryset(self):
+    def get_queryset(self, boardgame_sort_mode='', category='', table_sort_mode='', capacity='', *args, **kwargs):
         """
         Return dict consists of 2 datas: `boardgame`, and `table`.
         
@@ -138,9 +137,11 @@ class HomeView(generic.ListView):
             table: [`Table.objects`]
         }
         """
+        not_available = BoardGame.objects.filter(stock=0).values_list('boardgame_id', flat=True)
+
         return {
-            'boardgame': BoardGame.objects.all(),
-            'table': Table.objects.all()
+            'boardgame': BoardGame.get_sorted_data(boardgame_sort_mode=boardgame_sort_mode, category=category),
+            'table': Table.get_sorted_data(table_sort_mode=table_sort_mode, capacity=capacity),
             }
 
     def get_context_data(self, **kwargs):
@@ -202,79 +203,18 @@ class RentView(generic.ListView):
         post_data = normalize_data(request.POST)
 
         redirect_url = redirect('board_game_cafe:rent')
-        what_do = post_data['what_do']
         
-        def rent():
-            item_type = post_data['item_type']
-            item_id = post_data['item_id']
-            user = Customer.objects.get(customer_id=request.session['customer_id'])
-            
-            Booking.delete_if_exists(item_type, item_id, self.user)
-
-            if item_type == 'Table':
-                
-                if Rental.objects.filter(item_type='Table', status='rented', customer=user).count() >= 1:
-                    messages.warning(request, "You can rent 1 table at a time.")
-                    return redirect_url
-
-                Rental.objects.create(customer=user,
-                                    item_type=item_type,
-                                    item_id=item_id,
-                                    due_date=timezone.now()+timezone.timedelta(hours=23, minutes=58, seconds=59)
-                                    )
-
-            if item_type == 'BoardGame':
-                try:
-                    due_date_str = post_data['due_date']
-                    due_date = make_aware(datetime.strptime(due_date_str, "%Y-%m-%d"))
-                except ValueError:
-                    messages.error(request, "Invalid due date format. Please use YYYY-MM-DD.")
-                    return redirect('board_game_cafe:rent')
-
-                if not Rental.is_good_due_date_boardgame(due_date, item_type):
-                    messages.warning(request, f"You can rent {item_type.lower()} {Rental.max_rent_time} days at a time.")
-                    return redirect_url
-                    
-                if not Rental.can_rent(user, item_type):
-                    messages.warning(request, f"You can rent {Rental.max_rent} {item_type.lower()} at a time.")
-                    return redirect_url
-                
-                
-                try:
-                    BoardGame.objects.get(boardgame_id=item_id).rent_boardgame()
-                except ValueError:
-                    messages.warning(request, "This BoardGame has ran out of stock at the moment.")
-                    return redirect_url
-
-                Rental.objects.create(customer=user,
-                                        item_type=item_type,
-                                        item_id=item_id,
-                                        due_date=due_date
-                                        )
-            
-            messages.info(request, "Your rental order has been created.")
-
-            return redirect_url
-
-
-        def sort():
-            boardgame_sort_mode = post_data.get('boardgame_sort_mode')
-            category = post_data.get('boardgame_filter')
-            table_sort_mode = post_data.get('table_sort_mode')
-            capacity = post_data.get('table_filter')
-
-            boardgame_obj = BoardGame.get_sorted_data(boardgame_sort_mode, category)
-
-            table_obj = Table.get_sorted_data(table_sort_mode, capacity)
+        item_type = post_data['item_type']
+        item_id = post_data['item_id']
+        due_date = post_data['due_date']
+        user = Customer.objects.get(customer_id=request.session['customer_id'])
         
-            return render(request, 'app/index.html', 
-                    {'boardgame': boardgame_obj,
-                     'table': table_obj})
+        Booking.delete_if_exists(item_type, item_id, self.user)
 
-        what_do_handler = {'sort': sort,
-                           'rent': rent}
-        
-        return what_do_handler.get(what_do)()
+        Renter.get_renter(request=request, item_type=item_type, item_id=item_id, user=user, due_date=due_date)
+
+        return redirect_url
+
         
     def get_queryset(self):
         """
@@ -290,12 +230,14 @@ class RentView(generic.ListView):
         renting = Rental.objects.filter(customer=self.user,
                                         status="rented", item_type="BoardGame").values_list('item_id', flat=True)
         not_available = BoardGame.objects.filter(stock=0).values_list('boardgame_id', flat=True)
+        my_rentable_boardgame = Booking.get_rentable_booking(item_type="BoardGame", user=self.user)
+        exclude = set(renting) + set(not_available) - set(my_rentable_boardgame)
 
         return {
             'boardgame': BoardGame.objects.exclude(boardgame_id__in=list(renting)+list(not_available)),
             'table': [table
                       for table in Table.objects.all()
-                      if table.is_available()]
+                      if table.is_available()] + list(Booking.get_rentable_booking(item_type="Table", user=self.user))
         }
 
 
@@ -405,7 +347,7 @@ class StatView(generic.ListView):
             .order_by('-table_rental')
             .values_list('hour', flat=True).first()
         )
-        week_day = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+        week_day = ["", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
         peak_day = (
             Rental.objects.filter(item_type="Table")
             .annotate(day=ExtractWeekDay('rent_date'))  # Extract weekday from rent_date
