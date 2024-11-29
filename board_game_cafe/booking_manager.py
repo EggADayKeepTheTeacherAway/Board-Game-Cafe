@@ -21,11 +21,12 @@ class Booker:
     @classmethod
     def book_boardgame(cls, request, item_id, user) -> None:
         booking = Booking.create_or_delete(item_type="BoardGame", item_id=item_id, user=user)
+        boardgame = BoardGame.objects.get(boardgame_id=item_id)
         if booking is None:
+            boardgame.return_boardgame()
             messages.info(request, "Booking for BoardGame has been cancelled.")
             return
         next_in_queue = Booking.get_next_in_queue("BoardGame", item_id)
-        boardgame = BoardGame.objects.get(boardgame_id=item_id)
 
         if boardgame.is_available():
             boardgame.rent_boardgame()

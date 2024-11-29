@@ -221,7 +221,6 @@ class BoardGame(models.Model):
         return Rental.objects.filter(customer=user,
                     item_type="BoardGame", status='rented').count() < cls.max_rent
     
-    @property
     def is_available(self):
         return self.stock > 0
 

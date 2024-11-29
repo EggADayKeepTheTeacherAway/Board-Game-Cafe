@@ -21,7 +21,7 @@
                 <label for="category">Category:</label>
                 <select id="category" name="boardgame_filter">
                     <option value="">Select</option>
-                    {% for category in list_of_category %}
+                    {% for category in data.list_of_category %}
                         <option value="{{ category }}">{{ category }}</option>
                     {% endfor %}
                 </select>
@@ -38,7 +38,7 @@
                 <label for="capacity">Capacity:</label>
                 <select id="capacity" name="table_filter">
                     <option value="">Select</option>
-                    {% for all_capa in list_of_capacity %}
+                    {% for all_capa in data.list_of_capacity %}
                         <option value="{{ all_capa }}">{{ all_capa }}</option>
                     {% endfor %}
                 </select>

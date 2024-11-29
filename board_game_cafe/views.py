@@ -137,33 +137,18 @@ class HomeView(generic.ListView):
         }
         """
         not_available = BoardGame.objects.filter(stock=0).values_list('boardgame_id', flat=True)
-        
-        return {
-            'boardgame': BoardGame.get_sorted_data(boardgame_sort_mode=boardgame_sort_mode, category=category),
-            'table': Table.get_sorted_data(table_sort_mode=table_sort_mode, capacity=capacity),
-            }
-
-    def get_context_data(self, **kwargs):
-        """
-        Add custom context to the template.
-
-        (Use this method to sent the data that I want to results.html)
-        """
-        context = super().get_context_data(**kwargs)
-
+        num_max = max([table.capacity for table in Table.objects.all()])
         category_list = []
-
         for board in BoardGame.objects.all():
             if board.category.category_name not in category_list:
                 category_list.append(board.category.category_name)
 
-        context['list_of_category'] = category_list
-
-        num_max = max([table.capacity for table in Table.objects.all()])
-
-        context['list_of_capacity'] = [i for i in range(1, num_max + 1)]
-
-        return context
+        return {
+            'boardgame': BoardGame.get_sorted_data(boardgame_sort_mode=boardgame_sort_mode, category=category),
+            'table': Table.get_sorted_data(table_sort_mode=table_sort_mode, capacity=capacity),
+            'list_of_capacity': [i for i in range(1, num_max + 1)],
+            'list_of_category': category_list,
+            }
 
 
 class RentView(generic.ListView):
