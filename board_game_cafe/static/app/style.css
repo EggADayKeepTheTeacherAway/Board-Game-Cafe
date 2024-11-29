@@ -86,6 +86,13 @@ hr {
     font-size: 30px;
 
 }
+.sort-header{
+    font-size: 30px;
+}
+.sort > .controls {
+    margin-top: 7px;
+}
+
 .board-game-header{
     font-size: 30px;
 }
