@@ -50,7 +50,6 @@ class Booker:
             booking.status = 'rentable'
             booking.rentable_date = timezone.now()
             booking.save()
-            return
         
         messages.info(request, "Booking for Table was created successfully.")
 
