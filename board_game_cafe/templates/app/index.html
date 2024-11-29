@@ -105,21 +105,26 @@
 </section>
 
 <script>
-    function toggleBookingState(event, button) {
-        // Prevent form submission
+        function toggleBookingState(event, button) {
+        // Prevent form submission for toggling state
         event.preventDefault();
 
-        // Check the current state of the button and toggle
-        if (button.innerText.trim() === "Book") {
+        // Determine current button state
+        const isBooking = button.innerText.trim() === "Book";
+
+        if (isBooking) {
+            // Update button to show 'Cancel' state
             button.innerText = "Cancel";
             button.style.backgroundColor = "red";
-        } else {
-            button.innerText = "Book";
-            button.style.backgroundColor = ""; // Reset to default
-        }
 
-        // Optionally, submit the form programmatically here if needed:
-        // button.closest("form").submit();
+            // Submit the form programmatically
+            button.closest("form").submit();
+        } else {
+            // Update button back to 'Book' state
+            button.innerText = "Book";
+            button.style.backgroundColor = "";
+        }
     }
+
 </script>
 {% endblock %}
