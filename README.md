@@ -12,7 +12,7 @@ An interactive website for managing a board game cafe. Customers can book tables
 ## **Installation**  
 ### 1. Clone the repository
 ```
-git clone https://github.com/EggADayKeepTheTeacherAway/Board-Game-Cafe.git
+https://github.com/EggADayKeepTheTeacherAway/Board-Game-Cafe.git
 ```
 ### 2. Install requirements
 ```
