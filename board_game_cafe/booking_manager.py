@@ -13,11 +13,24 @@ class Booker:
 
         -Table
             1. If Table is available, booking will not be created but rental for the table instead.
-            2. If Table is not available, booking will wait until current user returns
+            2. If Table is not available, booking will wait until current user returns and rent right after them with added travel time (1 hour).
     Remarks:
         boardgame available: stock > 0
         table available: table is not being rented
     """
+    @classmethod
+    def book_boardgame(cls, request, item_id, user):
+        booking = Booking.create_or_delete(item_type="BoardGame", item_id=item_id, user=user)
+        if booking is None:
+            return
+        boardgame = BoardGame.objects.get(boardgame_id=item_id)
+        if boardgame.stock > 0:
+            boardgame.stock -= 1
+            booking.status = "rentable"
+            booking.rentable_date = timezone.now()
+            boardgame.save()
+
+
     @classmethod
     def book_table(cls, request, item_id, user):
         booking = Booking.create_or_delete(item_type="Table", item_id=item_id, user=user)
@@ -31,17 +44,7 @@ class Booker:
         messages.info(request, "Booking for Table was created successfully.")
 
 
-    @classmethod
-    def book_boardgame(cls, request, item_id, user):
-        booking = Booking.create_or_delete(item_type="BoardGame", item_id=item_id, user=user)
-        if booking is None:
-            return
-        boardgame = BoardGame.objects.get(boardgame_id=item_id)
-        if boardgame.stock > 0:
-            boardgame.stock -= 1
-            booking.status = "rentable"
-            booking.rentable_date = timezone.now()
-            boardgame.save()
+   
 
 
     @classmethod
