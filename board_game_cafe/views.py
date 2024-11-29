@@ -113,6 +113,8 @@ class HomeView(generic.ListView):
 
         if item_type and item_id:
             Booking.create_or_delete(item_type, item_id, user)
+            
+            messages.info(request, f"Booking for {item_type} was created successfully.")
 
         
         return render(request, "board_game_cafe:index", context={'data': {self.get_queryset(boardgame_sort_mode=boardgame_sort_mode,
@@ -224,12 +226,14 @@ class RentView(generic.ListView):
         renting = Rental.objects.filter(customer=self.user,
                                         status="rented", item_type="BoardGame").values_list('item_id', flat=True)
         not_available = BoardGame.objects.filter(stock=0).values_list('boardgame_id', flat=True)
+        my_rentable_boardgame = Booking.get_rentable_booking(item_type="BoardGame", user=self.user)
+        exclude = set(renting) + set(not_available) - set(my_rentable_boardgame)
 
         return {
             'boardgame': BoardGame.objects.exclude(boardgame_id__in=list(renting)+list(not_available)),
             'table': [table
                       for table in Table.objects.all()
-                      if table.is_available()]
+                      if table.is_available()] + list(Booking.get_rentable_booking(item_type="Table", user=self.user))
         }
 
 

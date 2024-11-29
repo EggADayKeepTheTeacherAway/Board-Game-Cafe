@@ -25,11 +25,12 @@ class Booking(models.Model):
     @classmethod
     def update_queue(cls, item_type, item_id):
         next_booking_in_queue = Booking.objects.filter(item_type=item_type,
-                                  item_id=item_id,
-                                  )
+                                  item_id=item_id, status="booked"
+                                  ).order_by('booking_id')
         if next_booking_in_queue.exists():
             next_booking = next_booking_in_queue.get()
             next_booking.status = 'rentable'
+            next_booking_in_queue.rentable_date = timezone.now()
             next_booking.save()
 
     @classmethod
@@ -46,7 +47,11 @@ class Booking(models.Model):
         if booking.exists():
             booking.delete()
             return
-        Booking.objects.create(item_type=item_type, item_id=item_id, customer=user)
+        return Booking.objects.create(item_type=item_type, item_id=item_id, customer=user)
+
+    @classmethod
+    def get_rentable_booking(cls, item_type, user):
+        Booking.objects.filter(item_type=item_type, customer=user, status='rentable')
 
     class Meta:
         app_label = 'board_game_cafe'
@@ -148,9 +153,10 @@ class Table(models.Model):
         return table_obj
 
 
-    def is_available(self):
-        return str(self.table_id) not in Rental.objects.filter(
-            item_type='Table', status="rented").values_list('item_id', flat=True)
+    def is_available(self, user):
+        return str(self.table_id) not in set(Rental.objects.filter(
+            item_type='Table', status="rented").values_list('item_id', flat=True))-\
+                set(Booking.get_rentable_booking(item_type="Table", user=user))
     
     def compute_fee(self, hours):
         grace_period = min(hours, 6)
