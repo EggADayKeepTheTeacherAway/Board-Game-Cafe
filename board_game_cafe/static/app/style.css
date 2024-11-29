@@ -78,7 +78,20 @@ hr {
 .main-body {
     margin: 60px;
 }
+.statistic-detail{
+    font-size: 25px;
+}
 
+.statistic-header{
+    font-size: 30px;
+
+}
+.board-game-header{
+    font-size: 30px;
+}
+.table-header{
+    font-size: 30px;
+}
 .container {
     margin-top: 40px;
 }
