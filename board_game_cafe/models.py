@@ -5,7 +5,7 @@ from math import ceil
 
 class Customer(models.Model):
     customer_id = models.AutoField(primary_key=True, unique=True)
-    customer_name = models.CharField(max_length=30, default=None)
+    customer_name = models.CharField(max_length=30, default=None, unique=True)
     contact = models.CharField(max_length=30, default=None)
     password = models.CharField(max_length=30, default=None)
 
@@ -20,6 +20,7 @@ class Booking(models.Model):
     item_type = models.CharField(max_length=30, default=None)
     item_id = models.CharField(max_length=30, default=None)
     status = models.CharField(max_length=30, default='booked')
+    rentable_date = models.DateTimeField(null=True)
     
     @classmethod
     def update_queue(cls, item_type, item_id):
@@ -78,14 +79,6 @@ class Rental(models.Model):
         item = {'Table': Table, 'BoardGame': BoardGame}.get(item_type)
         return Rental.objects.filter(customer=user,
                     item_type=item_type, status='rented').count() < item.max_rent
-    
-    @classmethod
-    def is_good_due_date_boardgame(cls, due_date, item_type):
-        item = {'Table': Table, 'BoardGame': BoardGame}.get(item_type)
-        time_difference = due_date - timezone.now()
-        time = {'Table': lambda t: t.total_seconds() / 3600,
-                'BoardGame': lambda t: t.total_seconds() / (3600*24) }
-        return time.get(item_type)(time_difference) / 3600 < item.max_rent_time
 
     @classmethod
     def create(cls, item_type, item_id, user, due_date):
@@ -133,9 +126,27 @@ class Table(models.Model):
     table_id = models.AutoField(primary_key=True, unique=True)
     capacity = models.IntegerField(default=4)
 
-    fee = 5
     max_rent_time = 6
     max_rent = 1
+    
+    @property
+    def fee(self):
+        return self.capacity*5
+    
+    @classmethod
+    def can_rent(cls, user):        
+        return Rental.objects.filter(customer=user,
+                    item_type="Table", status='rented').count() < cls.max_rent
+    
+    @classmethod
+    def get_sorted_data(cls, table_sort_mode, capacity):
+        table_obj = Table.objects.all()
+        if capacity:
+            table_obj = table_obj.filter(capacity=capacity)
+        if table_sort_mode:
+            table_obj = table_obj.order_by(table_sort_mode)
+        return table_obj
+
 
     def is_available(self):
         return str(self.table_id) not in Rental.objects.filter(
@@ -148,14 +159,7 @@ class Table(models.Model):
               + max(0, self.fee*(hours-grace_period))
               )
 
-    @classmethod
-    def get_sorted_data(cls, table_sort_mode, capacity):
-        table_obj = Table.objects.all()
-        if capacity:
-            table_obj = table_obj.filter(capacity=capacity)
-        if table_sort_mode:
-            table_obj = table_obj.order_by(table_sort_mode)
-        return table_obj
+    
     
 
 class BoardGameGroup(models.Model):
@@ -192,6 +196,15 @@ class BoardGame(models.Model):
         if boardgame_sort_mode:
             boardgame_obj = boardgame_obj.order_by(boardgame_sort_mode)
         return boardgame_obj
+    
+    @classmethod
+    def is_good_due_date(cls, due_date):
+        return (due_date - timezone.now()).total_seconds()/(3600*24) < cls.max_rent_time
+    
+    @classmethod
+    def can_rent(cls, user):
+        return Rental.objects.filter(customer=user,
+                    item_type="BoardGame", status='rented').count() < cls.max_rent
 
     def rent_boardgame(self):
         if self.stock <= 0:
