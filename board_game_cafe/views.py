@@ -17,6 +17,7 @@ from .models import (Rental, Table, BoardGame,
                      BoardGameGroup, Booking
                      )
 from .rental_manager import Renter
+from .booking_manager import Booker
 
 def normalize_data(data):
     post_data = {}
@@ -116,9 +117,7 @@ class HomeView(generic.ListView):
         capacity = post_data.get('table_filter')
 
         if item_type and item_id:
-            Booking.create_or_delete(item_type, item_id, user)
-            
-            messages.info(request, f"Booking for {item_type} was created successfully.")
+            Booker.run_booker(item_type=item_type, request=request, item_id=item_id, user=user)
 
         
         return render(request, "board_game_cafe:index", context={'data': {self.get_queryset(boardgame_sort_mode=boardgame_sort_mode,
@@ -211,7 +210,7 @@ class RentView(generic.ListView):
         
         Booking.delete_if_exists(item_type, item_id, self.user)
 
-        Renter.get_renter(request=request, item_type=item_type, item_id=item_id, user=user, due_date=due_date)
+        Renter.run_renter(request=request, item_type=item_type, item_id=item_id, user=user, due_date=due_date)
 
         return redirect_url
 
@@ -227,14 +226,14 @@ class RentView(generic.ListView):
             table: [`Table.objects`]
         }
         """
-        renting = Rental.objects.filter(customer=self.user,
-                                        status="rented", item_type="BoardGame").values_list('item_id', flat=True)
-        not_available = BoardGame.objects.filter(stock=0).values_list('boardgame_id', flat=True)
-        my_rentable_boardgame = Booking.get_rentable_booking(item_type="BoardGame", user=self.user)
+        renting = set(Rental.objects.filter(customer=self.user,
+                                        status="rented", item_type="BoardGame").values_list('item_id', flat=True) or [])
+        not_available = set(BoardGame.objects.filter(stock=0).values_list('boardgame_id', flat=True) or [])
+        my_rentable_boardgame = set(Booking.objects.filter(status="rentable", item_type="BoardGame", customer=self.user) or [])
         exclude = set(renting).union(set(not_available)) - set(my_rentable_boardgame)
 
         return {
-            'boardgame': BoardGame.objects.exclude(boardgame_id__in=list(renting)+list(not_available)),
+            'boardgame': BoardGame.objects.exclude(boardgame_id__in=exclude),
             'table': [table
                       for table in Table.objects.all()
                       if table.is_available()] + list(Booking.get_rentable_booking(item_type="Table", user=self.user))

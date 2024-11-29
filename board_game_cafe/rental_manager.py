@@ -56,6 +56,7 @@ class Renter:
         messages.info(request, "Your rental order has been created.")
     
     @classmethod
-    def get_renter(cls, item_type, *args, **kwargs):
+    def run_renter(cls, item_type, *args, **kwargs):
         return {"Table": cls.rent_table,
                 "BoardGame": cls.rent_boardgame}.get(item_type)(item_type=item_type, *args, **kwargs)
+    

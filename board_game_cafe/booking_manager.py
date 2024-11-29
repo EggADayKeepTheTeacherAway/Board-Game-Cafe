@@ -19,17 +19,22 @@ class Booker:
         table available: table is not being rented
     """
     @classmethod
-    def book_boardgame(cls, request, item_id, user):
+    def book_boardgame(cls, request, item_id, user) -> None:
         booking = Booking.create_or_delete(item_type="BoardGame", item_id=item_id, user=user)
         if booking is None:
+            messages.info(request, "Booking for BoardGame has been cancelled.")
             return
+        next_in_queue = Booking.get_next_in_queue("BoardGame", item_id)
         boardgame = BoardGame.objects.get(boardgame_id=item_id)
-        if boardgame.stock > 0:
-            boardgame.stock -= 1
+
+        if boardgame.is_available():
+            boardgame.rent_boardgame()
             booking.status = "rentable"
             booking.rentable_date = timezone.now()
-            boardgame.save()
+            booking.save()
+            return
 
+        messages.info(request, "Booking for BoardGame was created successfully.")
 
     @classmethod
     def book_table(cls, request, item_id, user):
@@ -37,17 +42,18 @@ class Booker:
         if booking is None:
             messages.info(request, "Booking for Table has been cancelled.")
             return
-        if Table.objects.get(table_id=item_id).is_available():
+        
+        table = Table.objects.get(table_id=item_id)
+        if table.is_available():
             booking.status = 'rentable'
             booking.rentable_date = timezone.now()
             booking.save()
+            return
+        
         messages.info(request, "Booking for Table was created successfully.")
 
 
-   
-
-
     @classmethod
-    def get_booker(cls, item_type):
+    def run_booker(cls, item_type, request, item_id, user):
         return {"Table": cls.book_table,
-                "BoardGame": cls.book_boardgame}.get(item_type)()
+                "BoardGame": cls.book_boardgame}.get(item_type)(request=request, item_id=item_id, user=user)

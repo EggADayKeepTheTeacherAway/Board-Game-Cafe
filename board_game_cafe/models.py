@@ -44,7 +44,7 @@ class Booking(models.Model):
 
     @classmethod
     def get_next_in_queue(cls, item_type, item_id):
-
+        return Booking.objects.filter(item_type=item_type, item_id=item_id, status='booked').order_by('booking_id').first()
 
     @classmethod
     def create_or_delete(cls, item_type, item_id, user):
@@ -53,10 +53,6 @@ class Booking(models.Model):
             booking.delete()
             return
         return Booking.objects.create(item_type=item_type, item_id=item_id, customer=user)
-
-    @classmethod
-    def get_rentable_booking(cls, item_type, user):
-        Booking.objects.filter(item_type=item_type, customer=user, status='rentable')
 
     class Meta:
         app_label = 'board_game_cafe'
@@ -219,6 +215,10 @@ class BoardGame(models.Model):
     def can_rent(cls, user):
         return Rental.objects.filter(customer=user,
                     item_type="BoardGame", status='rented').count() < cls.max_rent
+    
+    @property
+    def is_available(self):
+        return self.stock > 0
 
     def rent_boardgame(self):
         if self.stock <= 0:
