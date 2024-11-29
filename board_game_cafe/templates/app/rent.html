@@ -55,7 +55,7 @@
     <div>
         <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
         <button onclick="confirmRent()">Confirm</button>
-        <button onclick="closePopup()">Cancel</button>
+        <button onclick="closePopup()" style="background-color: red; color: white;">Cancel</button>
     </div>
 </div>
 
@@ -99,7 +99,6 @@
         const endDate = endDateInput.value;
 
         if (!endDate) {
-            alert('Please select an end date before confirming!');
             return;
         }
 
@@ -148,7 +147,6 @@
         document.body.appendChild(form);
         form.submit();
 
-        alert(`You have successfully rented "${currentItemName}" until ${endDate}!`);
         closePopup();
     }
 
