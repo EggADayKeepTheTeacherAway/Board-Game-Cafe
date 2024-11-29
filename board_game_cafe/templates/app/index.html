@@ -2,6 +2,53 @@
 
 {% block content %}
 <section class="main-body">
+   <form method="post" action="{% url 'board_game_cafe:index' %}">
+    {% csrf_token %}
+    <fieldset class="sort container" id="sort-container">
+        <legend class="sort-header">
+            Sort and Filter
+        </legend>
+        <div class="controls">
+            <label for="board-sort">Board Game:</label>
+            <div id="board-sort">
+                <label for="sort">Sort by:</label>
+                <select id="sort" name="boardgame_sort_mode">
+                    <option value="">Select</option>
+                    <option value="A-Z">Name (A-Z)</option>
+                    <option value="Popularity">Popularity</option>
+                </select>
+
+                <label for="category">Category:</label>
+                <select id="category" name="boardgame_filter">
+                    <option value="">Select</option>
+                    {% for category in list_of_category %}
+                        <option value="{{ category }}">{{ category }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <label for="table-sort">Table:</label>
+            <div id="table-sort">
+                <label for="table-sortby">Sort by:</label>
+                <select id="table-sortby" name="table_sort_mode">
+                    <option value="">Select</option>
+                    <option value="capacity">Capacity</option>
+                </select>
+
+                <label for="capacity">Capacity:</label>
+                <select id="capacity" name="table_filter">
+                    <option value="">Select</option>
+                    {% for all_capa in list_of_capacity %}
+                        <option value="{{ all_capa }}">{{ all_capa }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit" class="sort-btn">Enter</button>
+        </div>
+    </fieldset>
+</form>
+
+
     <fieldset class="board-game container">
         <legend class="board-game-header">
             Board Game
@@ -13,35 +60,22 @@
                 <span class="category">Genre: {{ book.category.category_name }}</span>
                 <span class="category">Number of Player: {{ book.group.num_player }}</span>
                 <span class="category">Base Fee: {{ book.group.base_fee }} Baht / day</span>
-                <form method="POST" action="{% url 'board_game_cafe:index' %}">
-                    {% csrf_token %}
-                    <input type="hidden" name="boardgame_sort_mode" value="none">
-                    <input type="hidden" name="boardgame_filter" value="none">
-                    <input type="hidden" name="table_sort_mode" value="none">
-                    <input type="hidden" name="table_filter" value="none">
-                    <button type="submit" class="button">book</button>
-                </form>
+                <span class="category">In Stock: {{ book.stock }}</span>
 
+                <form method="POST" action="{% url 'board_game_cafe:index' %}" class="booking-form">
+                    {% csrf_token %}
+                    <input type="hidden" name="item_type" value="BoardGame">
+                    <input type="hidden" name="item_id" value="{{ book.boardgame_id }}">
+                    <button type="submit"
+                            class="button book-button"
+                            data-item-id="{{ book.boardgame_id }}"
+                            onclick="toggleBookingState(event, this)">
+                        Book
+                    </button>
+                </form>
             </div>
         {% endfor %}
 
-        <div class="controls">
-            <label for="sort">Sort by:</label>
-            <select id="sort" onchange="">
-                <option value="">Select</option>
-                <option value="name_asc">Name (A-Z)</option>
-                <option value="popular">Popularity</option>
-            </select>
-
-            <label for="category">Category:</label>
-            <select id="category" onchange="">
-                <option value="">Select</option>
-                {% for category in list_of_category %}
-                    <option value="{{ category }}">{{ category }}</option>
-                {% endfor %}
-            </select>
-
-        </div>
     </fieldset>
 
     <fieldset class="table container">
@@ -50,29 +84,43 @@
         </legend>
 
         {% for table in data.table %}
-            <div class="content">
+            <div class="content" id="table">
                 <span class="name">Table {{ table.table_id }}</span>
                 <span class="capacity">Capacity: {{ table.capacity }}</span>
-                <span class="category">Base Fee: {{ table.fee}}  Baht / day</span>
-                <a href="{% url 'board_game_cafe:post_view' %}?action=book" class="button">book</a>
+                <span class="category">Base Fee: {{ table.fee }} Baht / day</span>
+                <form method="POST" action="{% url 'board_game_cafe:index' %}" class="booking-form">
+                    {% csrf_token %}
+                    <input type="hidden" name="item_type" value="Table">
+                    <input type="hidden" name="item_id" value="{{ table.table_id }}">
+                    <button type="submit"
+                            class="button book-button"
+                            data-item-id="{{ table.table_id }}"
+                            onclick="toggleBookingState(event, this)">
+                        Book
+                    </button>
+                </form>
             </div>
         {% endfor %}
 
-        <div class="controls">
-            <label for="table-sort">Sort by:</label>
-            <select id="table-sort" onchange="">
-                <option value="">Select</option>
-                <option value="capacity">Capacity</option>
-            </select>
-
-            <label for="capacity">Capacity:</label>
-            <select id="capacity" onchange="">
-                <option value="">Select</option>
-                {% for all_capa in list_of_capacity %}
-                    <option value="{{ all_capa }}">{{ all_capa }}</option>
-                {% endfor %}
-            </select>
-        </div>
     </fieldset>
 </section>
+
+<script>
+    function toggleBookingState(event, button) {
+        // Prevent form submission
+        event.preventDefault();
+
+        // Check the current state of the button and toggle
+        if (button.innerText.trim() === "Book") {
+            button.innerText = "Cancel";
+            button.style.backgroundColor = "red";
+        } else {
+            button.innerText = "Book";
+            button.style.backgroundColor = ""; // Reset to default
+        }
+
+        // Optionally, submit the form programmatically here if needed:
+        // button.closest("form").submit();
+    }
+</script>
 {% endblock %}

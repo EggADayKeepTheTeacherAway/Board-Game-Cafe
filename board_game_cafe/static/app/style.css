@@ -62,7 +62,17 @@ hr {
     color: white;
 }
 
+/* sort and filter */
+.controls {
+    display: flex;
+    gap: 5px;
+}
 
+.sort-btn {
+    color: white;
+    background-color: black;
+    border: none;
+}
 /* body start here */
 
 .main-body {
@@ -70,7 +80,7 @@ hr {
 }
 
 .container {
-    margin-top: 80px;
+    margin-top: 40px;
 }
 
 legend {
@@ -89,6 +99,13 @@ fieldset {
 
     border-radius: 8px;
     border: 2px solid #953C00;
+}
+
+#sort-container {
+    min-height: 0px;
+    height: fit-content;
+    width: fit-content;
+
 }
 
 .content {
