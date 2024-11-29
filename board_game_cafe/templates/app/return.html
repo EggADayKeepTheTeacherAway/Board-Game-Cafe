@@ -8,12 +8,17 @@
         </legend>
 
         {% for return in data.boardgame %}
-            <div class="content">
+            <div class="content" id="return-board">
                 <span class="name">Name: {{ return.boardgame_name }}</span>
                 <span class="category">Genre: {{ return.category.category_name }}</span>
                 <span class="category">Number of Player: {{ return.group.num_player }}</span>
                 <span class="category">Base Fee: {{ return.group.base_fee }} Baht / day</span>
-                <a href="{% url 'board_game_cafe:post_view' %}?action=return" class="button">return</a>
+                <form method="POST" action="{% url 'board_game_cafe:return' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="item_id" value="{{ return.boardgame_id }}">
+                    <input type="hidden" name="item_type" value="BoardGame">
+                    <button type="submit" class="button">Return</button>
+                </form>
             </div>
         {% endfor %}
 
@@ -25,11 +30,16 @@
         </legend>
 
          {% for table in data.table %}
-            <div class="content">
+            <div class="content" id="table">
                 <span class="name">Table {{ table.table_id }}</span>
                 <span class="capacity">Capacity: {{ table.capacity }}</span>
                 <span class="category">Base Fee: {{ table.fee}} THB</span>
-                <a href="{% url 'board_game_cafe:post_view' %}?action=return" class="button">return</a>
+                  <form method="POST" action="{% url 'board_game_cafe:return' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="item_id" value="{{ table.table_id }}">
+                    <input type="hidden" name="item_type" value="Table">
+                    <button type="submit" class="button">Return</button>
+                </form>
             </div>
         {% endfor %}
 

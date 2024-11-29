@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils import timezone
+from math import ceil
 
 
 class Customer(models.Model):
@@ -38,6 +39,14 @@ class Booking(models.Model):
         if booking_for_this_obj.exists():
             booking_for_this_obj.get().delete()
 
+    @classmethod
+    def create_or_delete(cls, item_type, item_id, user):
+        booking = Booking.objects.filter(item_type=item_type, item_id=item_id, customer=user)
+        if booking.exists():
+            booking.delete()
+            return
+        Booking.objects.create(item_type=item_type, item_id=item_id, customer=user)
+
     class Meta:
         app_label = 'board_game_cafe'
         db_table = 'Booking'
@@ -60,11 +69,9 @@ class Rental(models.Model):
 
     @property
     def duration(self) -> int:
-        return (timezone.now() - self.rent_date).days
-
-    @property
-    def duration_hour(self) -> int:
-        return (timezone.now() - self.rent_date).hour
+        if self.item_type == 'Table':
+            return ceil((timezone.now() - self.rent_date).total_seconds()/3600)
+        return ceil((timezone.now() - self.rent_date).total_seconds()/(3600*24))
 
     @classmethod
     def can_rent(cls, user, item_type):
@@ -73,7 +80,7 @@ class Rental(models.Model):
                     item_type=item_type, status='rented').count() < item.max_rent
     
     @classmethod
-    def is_good_due_date(cls, due_date, item_type):
+    def is_good_due_date_boardgame(cls, due_date, item_type):
         item = {'Table': Table, 'BoardGame': BoardGame}.get(item_type)
         time_difference = due_date - timezone.now()
         time = {'Table': lambda t: t.total_seconds() / 3600,
@@ -111,10 +118,11 @@ class Rental(models.Model):
         return handle_item_type[self.item_type](self.item_id)
     
     def compute_fee(self):
-        self.fee = self.get_item().compute_fee()
+        self.fee = self.get_item().compute_fee(self.duration)
         self.status = 'returned'
         self.return_date = timezone.now()
         self.save()
+        return self.fee
 
     class Meta:
         app_label = 'board_game_cafe'
@@ -130,7 +138,7 @@ class Table(models.Model):
     max_rent = 1
 
     def is_available(self):
-        return self.table_id not in Rental.objects.filter(
+        return str(self.table_id) not in Rental.objects.filter(
             item_type='Table', status="rented").values_list('item_id', flat=True)
     
     def compute_fee(self, hours):

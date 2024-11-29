@@ -95,3 +95,14 @@ button#submit-btn {
 button#submit-btn:hover {
   background-color: #cc5200;
 }
+
+.messages {
+    list-style: none;
+    margin: 1em 0 2em;
+    padding: 0;
+}
+
+.messages li {
+    color: white;
+}
+

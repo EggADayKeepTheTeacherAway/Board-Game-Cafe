@@ -110,7 +110,7 @@ fieldset {
 
 .content {
     display: grid;
-    grid-template-columns: 20% 20% 20% 20% 20%;
+    grid-template-columns: repeat(6, 16%);
 
 
     background-color: #f1f1f1;
@@ -123,6 +123,14 @@ fieldset {
     border: 1px solid #DBDBDB;
 }
 
+#table {
+    grid-template-columns: repeat(4, 25%);
+}
+
+#return-board {
+    grid-template-columns: repeat(5, 20%);
+}
+
 .name {
     margin-left: 16px;
     align-self: center;
@@ -133,6 +141,7 @@ fieldset {
     align-self: center;
 
 }
+
 
 /* functionality */
 .button {
@@ -152,7 +161,7 @@ fieldset {
     text-align: center;
     text-decoration: none;
 
-    height: 1.5rem;
+    height: 2rem;
     width: 5rem;
     justify-self: end;
     align-self: center;
@@ -258,4 +267,34 @@ fieldset {
 
 #logout-btn {
     color: #bf0906;
+}
+
+/* Error message */
+.messages {
+    list-style: none;
+    margin: 1em 0 2em;
+    padding: 0;
+}
+
+.messages li {
+    padding: 1em;
+    width: 100%;
+    color: white;
+    line-height: 2.0em;
+}
+
+.messages li.warning {
+    background-color: rgb(146, 0, 0);
+}
+
+.messages li.error {
+    background-color: rgb(146, 0, 0);
+}
+
+.messages li.info {
+    background-color: rgb(36, 146, 0);
+}
+
+.messages li.success {
+    background-color: rgb(36, 146, 0);
 }

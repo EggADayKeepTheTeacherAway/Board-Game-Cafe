@@ -18,6 +18,16 @@ from .models import (Rental, Table, BoardGame,
                      BoardGameGroup, Booking
                      )
 
+def normalize_data(data):
+    post_data = {}
+    for key, val in data.items():
+        if val == 'none':
+            post_data[key] = ''
+            continue
+        post_data[key] = val
+    print(post_data)
+    return post_data
+
 
 def login(request):
     """Login function."""
@@ -52,6 +62,10 @@ def signup(request):
             messages.warning(request, "You already have an account.")
             return redirect('signup')
 
+        if len(contact) != 10:
+            messages.warning(request, "Invalid contact number")
+            return redirect('signup')
+
         user = Customer.objects.create(customer_name=customer_name,
                                        password=password,
                                        contact=contact)
@@ -81,25 +95,37 @@ class HomeView(generic.ListView):
         """
         POST DATA SCHEMA:
         {
+            item_type: str['Table' || 'BoardGame']
+            item_id: str|int
+
             boardgame_sort_mode: str['A-Z' || 'Popularity']
             boardgame_filter: str
             table_sortt_mode: str
             table_filter: str
         }
         """
+
+        post_data = normalize_data(request.POST)
+
         user = Customer.objects.get(customer_id=request.session['customer_id'])
-        boardgame_sort_mode = request.POST.get('boardgame_sort_mode')
-        category = request.POST.get('boardgame_filter')
-        table_sort_mode = request.POST.get('table_sort_mode')
-        capacity = request.POST.get('table_filter')
+        item_type = post_data.get('item_type')
+        item_id = post_data.get('item_id')
+        boardgame_sort_mode = post_data.get('boardgame_sort_mode')
+        category = post_data.get('boardgame_filter')
+        table_sort_mode = post_data.get('table_sort_mode')
+        capacity = post_data.get('table_filter')
+
+        if item_type and item_id:
+            Booking.create_or_delete(item_type, item_id, user)
+
         
-        return render(request, 'app/index.html', 
-                    {'boardgame': BoardGame.get_sorted_data(boardgame_sort_mode, category),
-                     'table': Table.get_sorted_data(table_sort_mode, capacity),
-                     'my_table_book': Booking.objects.filter(customer=user, item_type='Table'),
-                     'my_bg_book': Booking.objects.filter(customer=user, item_type='BoardGame'),
-                     })
-            
+        return render(request, 'app/index.html', context={'data':
+                                                          {'boardgame': BoardGame.get_sorted_data(boardgame_sort_mode, category),
+                                                            'table': Table.get_sorted_data(table_sort_mode, capacity),
+                                                            'my_table_book': Booking.objects.filter(customer=user, item_type='Table'),
+                                                            'my_bg_book': Booking.objects.filter(customer=user, item_type='BoardGame'),
+                                                            }})
+        
 
     def get_queryset(self):
         """
@@ -173,41 +199,58 @@ class RentView(generic.ListView):
         }
         """
 
+        post_data = normalize_data(request.POST)
+
         redirect_url = redirect('board_game_cafe:rent')
-        what_do = request.POST['what_do']
+        what_do = post_data['what_do']
         
         def rent():
-            item_type = request.POST['item_type']
-            item_id = request.POST['item_id']
+            item_type = post_data['item_type']
+            item_id = post_data['item_id']
             user = Customer.objects.get(customer_id=request.session['customer_id'])
-            try:
-                due_date_str = request.POST['due_date']
-                due_date = make_aware(datetime.strptime(due_date_str, "%Y-%m-%d"))
-            except ValueError:
-                messages.error(request, "Invalid due date format. Please use YYYY-MM-DD.")
-                return redirect('board_game_cafe:rent')
             
             Booking.delete_if_exists(item_type, item_id, self.user)
 
-            day_or_hour = 'hours' if item_type == 'Table' else 'days'
-
-            item = {'Table': Table, 'BoardGame': BoardGame}.get(item_type)
-
-            if not Rental.is_good_due_date(due_date, item_type):
-                messages.warning(request, f"You can rent {item_type.lower()} {item.max_rent_time} {day_or_hour} at a time.")
-                return redirect_url
+            if item_type == 'Table':
                 
-            if not Rental.can_rent(user, item_type):
-                messages.warning(request, f"You can rent {item.max_rent} {item_type.lower()} at a time.")
-                return redirect_url
+                if Rental.objects.filter(item_type='Table', status='rented', customer=user).count() >= 1:
+                    messages.warning(request, "You can rent 1 table at a time.")
+                    return redirect_url
 
-            Rental.objects.create(customer=user,
+                Rental.objects.create(customer=user,
                                     item_type=item_type,
                                     item_id=item_id,
-                                    due_date=due_date
+                                    due_date=timezone.now()+timezone.timedelta(hours=23, minutes=58, seconds=59)
                                     )
+
             if item_type == 'BoardGame':
-                BoardGame.objects.get(boardgame_id=item_id).rent_boardgame()
+                try:
+                    due_date_str = post_data['due_date']
+                    due_date = make_aware(datetime.strptime(due_date_str, "%Y-%m-%d"))
+                except ValueError:
+                    messages.error(request, "Invalid due date format. Please use YYYY-MM-DD.")
+                    return redirect('board_game_cafe:rent')
+
+                if not Rental.is_good_due_date_boardgame(due_date, item_type):
+                    messages.warning(request, f"You can rent {item_type.lower()} {Rental.max_rent_time} days at a time.")
+                    return redirect_url
+                    
+                if not Rental.can_rent(user, item_type):
+                    messages.warning(request, f"You can rent {Rental.max_rent} {item_type.lower()} at a time.")
+                    return redirect_url
+                
+                
+                try:
+                    BoardGame.objects.get(boardgame_id=item_id).rent_boardgame()
+                except ValueError:
+                    messages.warning(request, "This BoardGame has ran out of stock at the moment.")
+                    return redirect_url
+
+                Rental.objects.create(customer=user,
+                                        item_type=item_type,
+                                        item_id=item_id,
+                                        due_date=due_date
+                                        )
             
             messages.info(request, "Your rental order has been created.")
 
@@ -215,10 +258,10 @@ class RentView(generic.ListView):
 
 
         def sort():
-            boardgame_sort_mode = request.POST.get('boardgame_sort_mode')
-            category = request.POST.get('boardgame_filter')
-            table_sort_mode = request.POST.get('table_sort_mode')
-            capacity = request.POST.get('table_filter')
+            boardgame_sort_mode = post_data.get('boardgame_sort_mode')
+            category = post_data.get('boardgame_filter')
+            table_sort_mode = post_data.get('table_sort_mode')
+            capacity = post_data.get('table_filter')
 
             boardgame_obj = BoardGame.get_sorted_data(boardgame_sort_mode, category)
 
@@ -269,10 +312,21 @@ class ReturnView(generic.ListView):
         """
         POST DATA SCHEMA:
         {
-            rental_id: str|int
+            item_id: str|int
+            item_type: str
         }
         """
-        rental = Rental.objects.get(rental_id=request.POST['rental_id'])
+
+        post_data = normalize_data(request.POST)
+
+        user = Customer.objects.get(customer_id=request.session['customer_id'])
+        rental = Rental.objects.get(
+            item_type=post_data['item_type'],
+            item_id=post_data['item_id'],
+            customer=user,
+            status='rented'
+        )
+
         item_type = rental.item_type
         item_id = rental.item_id
         rental_fee = rental.compute_fee()
@@ -280,11 +334,16 @@ class ReturnView(generic.ListView):
         if rental.item_type == 'BoardGame':
             item.return_boardgame()
         Booking.update_queue(item_type=item_type, item_id=item_id)
-        messages.info(f"There is {rental_fee} Baht fee for your rental.")
-        return render(request, self.template_name, self.get_queryset())
-        
+        rental.status = 'returned'
+        rental.fee = rental_fee
+        rental.return_date = timezone.now()
+        rental.save()
+        for rental in Rental.objects.all():
+            print(f"{rental.item_type: <10} {rental.customer.customer_name: <10} {rental.rent_date: <10} {rental.due_date: <10}")
+        messages.info(request, f"There is {rental_fee} Baht fee for your rental.")
+        return redirect('board_game_cafe:return')
 
-    def get_queryset(self):
+    def get_queryset(self, *args, **kwargs):
         """
         Return dict consists of 2 datas: `boardgame`, and `table`.
         
@@ -295,6 +354,9 @@ class ReturnView(generic.ListView):
             table: [`Table.objects`]
         }
         """
+        user = kwargs.get('user')
+        if user:
+            self.user = user
 
         boardgame_rental = Rental.objects.filter(customer=self.user, item_type="BoardGame",
                                                status='rented')
