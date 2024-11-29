@@ -12,7 +12,8 @@ class Booker:
             3. If BoardGame was returned while there are Bookings for the boardgame, oldest booking's status will be `rentable`, and boardgame stock deducted.
 
         -Table
-            1. If Table is available, booking
+            1. If Table is available, booking will not be created but rental for the table instead.
+            2. If Table is not available, booking will wait until current user returns
     Remarks:
         boardgame available: stock > 0
         table available: table is not being rented

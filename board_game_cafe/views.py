@@ -231,7 +231,7 @@ class RentView(generic.ListView):
                                         status="rented", item_type="BoardGame").values_list('item_id', flat=True)
         not_available = BoardGame.objects.filter(stock=0).values_list('boardgame_id', flat=True)
         my_rentable_boardgame = Booking.get_rentable_booking(item_type="BoardGame", user=self.user)
-        exclude = set(renting) + set(not_available) - set(my_rentable_boardgame)
+        exclude = set(renting).union(set(not_available)) - set(my_rentable_boardgame)
 
         return {
             'boardgame': BoardGame.objects.exclude(boardgame_id__in=list(renting)+list(not_available)),
