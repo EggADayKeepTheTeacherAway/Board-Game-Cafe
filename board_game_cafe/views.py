@@ -236,7 +236,7 @@ class RentView(generic.ListView):
             'boardgame': BoardGame.objects.exclude(boardgame_id__in=exclude),
             'table': [table
                       for table in Table.objects.all()
-                      if table.is_available()] + list(Booking.get_rentable_booking(item_type="Table", user=self.user))
+                      if table.is_available(user=self.user)] + list(Booking.objects.filter(status='booked', item_type="Table", customer=self.user))
         }
 
 

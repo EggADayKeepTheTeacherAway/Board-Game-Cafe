@@ -153,11 +153,10 @@ class Table(models.Model):
             table_obj = table_obj.order_by(table_sort_mode)
         return table_obj
 
-
     def is_available(self, user):
         return str(self.table_id) not in set(Rental.objects.filter(
             item_type='Table', status="rented").values_list('item_id', flat=True))-\
-                set(Booking.get_rentable_booking(item_type="Table", user=user))
+                set(Booking.objects.filter(status="booked", item_type="Table", customer=user) or [])
     
     def compute_fee(self, hours):
         grace_period = min(hours, 6)
@@ -166,8 +165,6 @@ class Table(models.Model):
               + max(0, self.fee*(hours-grace_period))
               )
 
-    
-    
 
 class BoardGameGroup(models.Model):
     group_name = models.CharField(max_length=30, default="small")
