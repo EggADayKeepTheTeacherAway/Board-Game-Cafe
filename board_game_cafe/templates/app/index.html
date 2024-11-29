@@ -66,16 +66,22 @@
                     {% csrf_token %}
                     <input type="hidden" name="item_type" value="BoardGame">
                     <input type="hidden" name="item_id" value="{{ book.boardgame_id }}">
-                    <button type="submit"
-                            class="button book-button"
-                            data-item-id="{{ book.boardgame_id }}"
-                            onclick="toggleBookingState(event, this)">
-                        Book
-                    </button>
+                    {% if book.boardgame_id in data.booked_boardgame %}
+                        <button type="submit"
+                                class="button book-button booked"
+                                style="background-color: red; color: white;">
+                            Cancel
+                        </button>
+                    {% else %}
+                        <button type="submit"
+                                class="button book-button available"
+                                style="background-color: green; color: white;">
+                            Book
+                        </button>
+                    {% endif %}
                 </form>
             </div>
         {% endfor %}
-
     </fieldset>
 
     <fieldset class="table container">
@@ -92,39 +98,23 @@
                     {% csrf_token %}
                     <input type="hidden" name="item_type" value="Table">
                     <input type="hidden" name="item_id" value="{{ table.table_id }}">
-                    <button type="submit"
-                            class="button book-button"
-                            data-item-id="{{ table.table_id }}"
-                            onclick="toggleBookingState(event, this)">
-                        Book
-                    </button>
+                    {% if table.table_id in data.booked_table %}
+                        <button type="submit"
+                                class="button book-button booked"
+                                style="background-color: red; color: white;">
+                            Cancel
+                        </button>
+                    {% else %}
+                        <button type="submit"
+                                class="button book-button available"
+                                style="background-color: green; color: white;">
+                            Book
+                        </button>
+                    {% endif %}
                 </form>
             </div>
         {% endfor %}
     </fieldset>
+
 </section>
-
-<script>
-        function toggleBookingState(event, button) {
-        // Prevent form submission for toggling state
-        event.preventDefault();
-
-        // Determine current button state
-        const isBooking = button.innerText.trim() === "Book";
-
-        if (isBooking) {
-            // Update button to show 'Cancel' state
-            button.innerText = "Cancel";
-            button.style.backgroundColor = "red";
-
-            // Submit the form programmatically
-            button.closest("form").submit();
-        } else {
-            // Update button back to 'Book' state
-            button.innerText = "Book";
-            button.style.backgroundColor = "";
-        }
-    }
-
-</script>
 {% endblock %}
